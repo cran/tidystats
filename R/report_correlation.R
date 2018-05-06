@@ -11,8 +11,8 @@
 #' results <- read_stats(system.file("results.csv", package = "tidystats"))
 #'
 #' # Report results
-#' report(results, identifier = "correlation")
-#' report(results, identifier = "correlation", statistic = "r")
+#' report(identifier = "correlation", results = results)
+#' report(identifier = "correlation", statistic = "p", results = results)
 #'
 #' @export
 
@@ -20,6 +20,13 @@ report_correlation <- function(results, identifier, statistic = NULL) {
 
   # Extract the results of the specific model through its identifier
   res <- results[[identifier]]
+
+  # Check whether the statistic exists, if provided
+  if (!is.null(statistic)) {
+    if (!statistic %in% res$statistic) {
+      stop("Statistic not found.")
+    }
+  }
 
   # Check if only a single statistic is asked, otherwise produce a full line of APA results
   if (!is.null(statistic)) {

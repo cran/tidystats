@@ -25,7 +25,7 @@
 #'   )
 #'
 #' # Add results to results
-#' results <- add_stats(x_squared_data, results, identifier = "M1")
+#' results <- add_stats(x_squared_data, results)
 #'
 #' @export
 add_stats.data.frame <- function(output, results, identifier = NULL, statistics = NULL, type = NULL,
@@ -33,7 +33,13 @@ add_stats.data.frame <- function(output, results, identifier = NULL, statistics 
 
   # Create an identifier if it is not specified, else check whether it already exists
   if (is.null(identifier)) {
-    identifier <- paste0("M", formatC(length(results)+1, width = "1", format = "d"))
+
+    if (deparse(substitute(output)) == ".") {
+      identifier <- paste0("M", formatC(length(results)+1, width = "1", format = "d"))
+    } else {
+      identifier <- deparse(substitute(output))
+    }
+
   } else {
     if (!is.null(names(results))) {
       if (identifier %in% names(results)) {
@@ -43,7 +49,7 @@ add_stats.data.frame <- function(output, results, identifier = NULL, statistics 
   }
 
   # Throw a warning if non-standard columns are found in the data
-  if (sum(!names(output) %in% c("statistic", "value", "method", "group", "term")) > 0) {
+  if (sum(!names(output) %in% c("var", "statistic", "value", "method", "group", "term", "term_nr")) > 0) {
     warning(paste("Non-standard columns found."))
   }
 

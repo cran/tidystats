@@ -5,6 +5,8 @@
 #' @param results A tidy stats list.
 #' @param path Path or connection to write to.
 #'
+#' @details The \code{prettyNum} function is used to format the numbers before saving them to disk. This is to prevent saving numbers with many decimals.
+#'
 #' @examples
 #' # Create an empty list to store the results in
 #' results <- list()
@@ -24,7 +26,13 @@
 #' @export
 
 write_stats <- function(results, path) {
+
+  # Convert list to a data frame
   df <- stats_list_to_df(results)
 
+  # Round the stats values
+  df$value <- prettyNum(df$value)
+
+  # Write to disk
   readr::write_csv(df, path = path, na = "")
 }

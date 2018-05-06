@@ -12,17 +12,29 @@
 #' # Read in a list of results
 #' results <- read_stats(system.file("results.csv", package = "tidystats"))
 #'
+#' # Set the default results list
+#' options(tidystats_list = results)
+#'
 #' # Example: regression term
-#' report(results, identifier = "regression", term = "groupTrt")
-#' report(results, identifier = "regression", term_nr = 2)
-#' report(results, identifier = "regression", term = "groupTrt", statistic = "p")
+#' report("regression", term = "groupTrt")
+#' report("regression", term_nr = 2)
+#' report("regression", term = "groupTrt", statistic = "p")
+#'
+#' @import dplyr
+#' @import stringr
 #'
 #' @export
-
 report_lm <- function(results, identifier, term = NULL, term_nr = NULL, statistic = NULL) {
 
   # Extract the results of the specific model through its identifier
   res <- results[[identifier]]
+
+  # Check whether the statistic exists, if provided
+  if (!is.null(statistic)) {
+    if (!statistic %in% res$statistic) {
+      stop("Statistic not found.")
+    }
+  }
 
   # Check whether a term is provided, extract data if so, otherwise throw an error
   if (!is.null(term)) {
@@ -59,7 +71,7 @@ report_lm <- function(results, identifier, term = NULL, term_nr = NULL, statisti
       df_den <- res$value[res$statistic == "denominator df"]
       p <- report_p_value(res$value[res$statistic == "p"])
 
-      output <- paste0("adjusted *R*<sup>2</sup> = ", adj_r, ", *F*(", df_num, ", ",
+      output <- paste0("adjusted *R*^2^ = ", adj_r, ", *F*(", df_num, ", ",
                             df_den, ") = ", f, ", ", p)
     } else {
       b <- format(res$value[res$statistic == "b"], digits = 2, nsmall = 2)
@@ -68,9 +80,28 @@ report_lm <- function(results, identifier, term = NULL, term_nr = NULL, statisti
       df <- res$value[res$statistic == "df"]
       p = report_p_value(res$value[res$statistic == "p"])
 
-      output <- paste0("*b* = ", b, ", *SE* = ", SE, ", *t*(",  df, ") = ", t, ", ", p)
+      # Guess whether confidence intervals are included
+      res_CI <- filter(res, str_detect(statistic, "[1234567890] %"))
+
+      if (nrow(res_CI) > 0) {
+        CI_pct <- as.numeric(str_replace(res_CI$statistic, " %", ""))
+        CI_pct <- CI_pct[2] - CI_pct[1]
+
+        CI_value1 <- format(res_CI$value[1], nsmall = 2, digits = 2)
+        CI_value2 <- format(res_CI$value[2], nsmall = 2, digits = 2)
+
+        CI <- paste0(CI_pct, "% CI ", "[", CI_value1, ", ", CI_value2, "]")
+      }
+
+      # Return output
+      if (nrow(res_CI) > 0) {
+        output <- paste0("*b* = ", b, ", *SE* = ", SE, ", *t*(",  df, ") = ", t, ", ", p, ", ", CI)
+      } else {
+        output <- paste0("*b* = ", b, ", *SE* = ", SE, ", *t*(",  df, ") = ", t, ", ", p)
+      }
     }
   }
 
   return(output)
 }
+

@@ -14,6 +14,9 @@ write_stats(results, path)
 \description{
 \code{write_stats} converts a tidy stats results list to a data frame and then saves the data to a .csv file.
 }
+\details{
+The \code{prettyNum} function is used to format the numbers before saving them to disk. This is to prevent saving numbers with many decimals.
+}
 \examples{
 # Create an empty list to store the results in
 results <- list()
