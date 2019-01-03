@@ -2,16 +2,14 @@
 % Please edit documentation in R/report_t_test.R
 \name{report_t_test}
 \alias{report_t_test}
-\title{Report method for a t-test}
+\title{Report function for t-tests}
 \usage{
-report_t_test(results, identifier, statistic = NULL)
+report_t_test(identifier, results = getOption("tidystats_list"))
 }
 \arguments{
-\item{results}{A tidy stats list.}
-
 \item{identifier}{A character string identifying the model.}
 
-\item{statistic}{A character string of a statistic you want to extract from a model.}
+\item{results}{A tidystats list.}
 }
 \description{
 Function to report a t-test in APA style.
@@ -20,8 +18,13 @@ Function to report a t-test in APA style.
 # Read in a list of results
 results <- read_stats(system.file("results.csv", package = "tidystats"))
 
-# Example: t-test
-report(results, identifier = "t_test")
-report(results, identifier = "t_test", statistic = "p")
+# Set the default tidystats list in options()
+options(tidystats_list = results)
+
+# Report results
+report(identifier = "t_test_one_sample")
+report(identifier = "t_test_two_sample")
+report(identifier = "t_test_welch")
+report(identifier = "t_test_paired")
 
 }

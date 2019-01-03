@@ -1,61 +1,60 @@
-#' Report method for a t-test
+#' Report function for t-tests
 #'
 #' Function to report a t-test in APA style.
 #'
-#' @param results A tidy stats list.
 #' @param identifier A character string identifying the model.
-#' @param statistic A character string of a statistic you want to extract from a model.
+#' @param results A tidystats list.
+#'
 #' @examples
 #' # Read in a list of results
 #' results <- read_stats(system.file("results.csv", package = "tidystats"))
 #'
-#' # Example: t-test
-#' report(results, identifier = "t_test")
-#' report(results, identifier = "t_test", statistic = "p")
+#' # Set the default tidystats list in options()
+#' options(tidystats_list = results)
+#'
+#' # Report results
+#' report(identifier = "t_test_one_sample")
+#' report(identifier = "t_test_two_sample")
+#' report(identifier = "t_test_welch")
+#' report(identifier = "t_test_paired")
 #'
 #' @export
+report_t_test <- function(identifier, results = getOption("tidystats_list")) {
 
-report_t_test <- function(results, identifier, statistic = NULL) {
+  output <- NULL
 
   # Extract model results
   res <- results[[identifier]]
 
-  # Check whether the statistic exists, if provided
-  if (!is.null(statistic)) {
-    if (!statistic %in% res$statistic) {
-      stop("Statistic not found.")
-    }
-  }
+  # Check if all the necessary statistics are there to produce a line of output
+  if (sum(c("t", "df", "p") %in% unique(res$statistic)) == 3) {
+    # Extract statistics
+    t  <- dplyr::pull(dplyr::filter(res, statistic == "t"), value)
+    df <- dplyr::pull(dplyr::filter(res, statistic == "df"), value)
+    p  <- dplyr::pull(dplyr::filter(res, statistic == "p"), value)
 
-  # Check if only a single statistic is asked; if not, produce a full line of APA results
-  if (!is.null(statistic)) {
-
-    output <- res$value[res$statistic == statistic]
-
-    if (statistic == "p") {
-      if (output < .001) {
-        output <- "< .001"
-      } else {
-        output <- gsub(pattern = "0\\.", replacement = ".",
-                       x = format(output, digits = 2, nsmall = 2))
-      }
-    } else {
-      if (statistic != "df" | grepl("Welch", res$method[1])) {
-        output <- format(output, digits = 2, nsmall = 2)
-      }
-    }
-  } else {
-    t <- format(res$value[res$statistic == "t"], digits = 2, nsmall = 2)
-
-    if (grepl("Welch", res$method[1])) {
-      df <- format(res$value[res$statistic == "df"], digits = 2, nsmall = 2)
-    } else {
-      df <- format(res$value[res$statistic == "df"], digits = 0)
-    }
-
-    p <- report_p_value(res$value[res$statistic == "p"])
+    t  <- report_statistic("t", t)
+    df <- report_statistic("df", df)
+    p  <- report_p_value(p)
 
     output <- paste0("*t*(", df, ") = ", t, ", ", p)
+
+    # Add a confidence interval, if it exists
+    res_CI <- dplyr::filter(res, stringr::str_detect(statistic, "[0-9]+% CI"))
+
+    if (nrow(res_CI) > 0) {
+      CI_pct <- readr::parse_number(first(pull(res_CI, statistic)))
+
+      CI_lower <- dplyr::pull(res_CI, value)[1]
+      CI_upper <- dplyr::pull(res_CI, value)[2]
+
+      CI_lower <- report_statistic("CI", CI_lower)
+      CI_upper <- report_statistic("CI", CI_upper)
+
+      CI <- paste0(CI_pct, "% CI ", "[", CI_lower, ", ", CI_upper, "]")
+
+      output <- paste0(output, ", ", CI)
+    }
   }
 
   return(output)

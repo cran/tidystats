@@ -4,29 +4,45 @@
 \alias{add_stats}
 \title{Add statistical output to a tidy stats list}
 \usage{
-add_stats(output, results, identifier = NULL, statistics = NULL,
-  type = NULL, confirmatory = NULL, notes = NULL)
+add_stats(results, output, identifier = NULL, type = NULL,
+  confirmatory = NULL, notes = NULL, class = NULL)
 }
 \arguments{
-\item{output}{Output of a statistical test or a data frame. If a data frame is provided, it must already be in a tidy format.}
+\item{results}{A tidystats list.}
 
-\item{results}{A tidy stats list.}
+\item{output}{Output of a statistical test or a data frame. If a data frame
+is provided, it must already be in a tidy format.}
 
-\item{identifier}{A character string identifying the model. Automatically created if not provided.}
+\item{identifier}{A character string identifying the model. Automatically
+created if not provided.}
 
-\item{statistics}{A vector of statistics to select from the output and add to the tidy stats list.}
+\item{type}{A character string indicating the type of test. One of
+"hypothesis", "manipulation check", "contrast", "descriptives", or "other".
+Can be abbreviated.}
 
-\item{type}{A character string indicating the type of test. One of "hypothesis", "manipulation check", "contrast", "descriptives", or "other". Can be abbreviated.}
+\item{confirmatory}{A boolean to indicate whether the statistical test was
+confirmatory (TRUE) or exploratory (FALSE). Can be NA.}
 
-\item{confirmatory}{A boolean to indicate whether the statistical test was confirmatory (TRUE) or exploratory (FALSE). Can be NA.}
+\item{notes}{A character string to add additional information. Some
+statistical tests produce notes information, which will be overwritten if
+notes are provided.}
 
-\item{notes}{A character string to add additional information. Some statistical tests produce notes information, which will be overwritten if notes are provided.}
+\item{class}{A character string to indicate which function was used to
+produce the output. See 'Details' for a list of supported functions.}
 }
 \description{
-\code{add_stats} adds output to a results list. It can take either the output of a statistical test as input or a data frame. See Details for more information on adding data frames.
+\code{add_stats} adds output to a tidystats list. It can take either the
+output of a statistical test as input or a data frame. See Details for more
+information on adding data frames.
 }
 \details{
-Some statistical functions produce unidentifiable output, which means \code{tidystats} cannot figure out how to tidy the data. To add these results, the output should be manually tidied or tidied using one of \code{tidystats}'s tidy functions. See \code{?tidy_stats} for an overview of available functions.
+Some statistical functions produce unidentifiable output, which
+means \code{tidystats} cannot figure out how to tidy the data. To add these
+results, you can provide a class via the class argument or you can manually
+tidy the results yourself and add the resulting data frame via add_stats().
+
+A list of supported classes are:
+- \code{confint}
 }
 \examples{
 # Create an empty list to store the results in
@@ -34,7 +50,7 @@ results <- list()
 
 # Example: t-test
 model_t_test <- t.test(extra ~ group, data = sleep)
-results <- add_stats(model_t_test, results, identifier = "t_test")
+results <- add_stats(results, model_t_test, identifier = "t_test")
 
 # Example: correlation
 x <- c(44.4, 45.9, 41.9, 53.3, 44.7, 44.1, 50.7, 45.2, 60.1)
@@ -43,8 +59,7 @@ y <- c( 2.6,  3.1,  2.5,  5.0,  3.6,  4.0,  5.2,  2.8,  3.8)
 model_correlation <- cor.test(x, y)
 
 # Add output to the results list, only storing the correlation and p-value
-results <- add_stats(model_correlation, results, identifier = "correlation",
-                     statistics = c("r", "p"))
+results <- add_stats(results, model_correlation, identifier = "correlation")
 
 # Example: Regression
 ctl <- c(4.17,5.58,5.18,6.11,4.50,4.61,5.17,4.53,5.33,5.14)
@@ -55,17 +70,18 @@ weight <- c(ctl, trt)
 model_lm <- lm(weight ~ group)
 
 # Add output to the results list, with notes
-results <- add_stats(model_lm, results, identifier = "regression", notes = "regression example")
+results <- add_stats(results, model_lm, identifier = "regression", notes =
+"regression example")
 
 # Example: ANOVA
 model_aov <- aov(yield ~ block + N * P * K, npk)
 
-results <- add_stats(model_aov, results, identifier = "ANOVA")
+results <- add_stats(results, model_aov, identifier = "ANOVA")
 
 # Example: Within-subjects ANOVA
 model_aov_within <- aov(extra ~ group + Error(ID/group), data = sleep)
 
-results <- add_stats(model_aov_within, results, identifier = "ANOVA_within")
+results <- add_stats(results, model_aov_within, identifier = "ANOVA_within")
 
 # Example: Manual chi-squared test of independence
 library(tibble)
@@ -76,6 +92,6 @@ x_squared_data <- tibble(
   method = "Chi-squared test of independence"
 )
 
-results <- add_stats(x_squared_data, results, identifier = "x_squared")
+results <- add_stats(results, x_squared_data, identifier = "x_squared")
 
 }

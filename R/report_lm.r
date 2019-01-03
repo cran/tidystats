@@ -2,11 +2,12 @@
 #'
 #' Function to report a regression in APA style.
 #'
-#' @param results A tidy stats list.
 #' @param identifier A character string identifying the model.
-#' @param term A character string indicating which term you want to report the statistics of.
-#' @param term_nr A number indicating which term you want to report the the statistics of.
-#' @param statistic A character string of a statistic you want to extract from a model.
+#' @param group A character string indicating the group containing the
+#' statistics you want to report.
+#' @param term A character string indicating the term you want to report.
+#' @param term_nr A number indicating the term you want to report.
+#' @param results A tidystats list.
 #'
 #' @examples
 #' # Read in a list of results
@@ -15,89 +16,103 @@
 #' # Set the default results list
 #' options(tidystats_list = results)
 #'
-#' # Example: regression term
-#' report("regression", term = "groupTrt")
-#' report("regression", term_nr = 2)
-#' report("regression", term = "groupTrt", statistic = "p")
-#'
-#' @import dplyr
-#' @import stringr
+#' # Report results
+#' report("lm_simple", term = "conditionmortality salience")
+#' report("lm_simple", term_nr = 2)
+#' report("lm_simple", group = "model")
 #'
 #' @export
-report_lm <- function(results, identifier, term = NULL, term_nr = NULL, statistic = NULL) {
+report_lm <- function(identifier, group = NULL, term = NULL, term_nr = NULL,
+  results = getOption("tidystats_list")) {
+
+  output <- NULL
 
   # Extract the results of the specific model through its identifier
   res <- results[[identifier]]
 
-  # Check whether the statistic exists, if provided
-  if (!is.null(statistic)) {
-    if (!statistic %in% res$statistic) {
-      stop("Statistic not found.")
-    }
-  }
+  # Store the arguments in variables that do not share column names with the
+  # model data frame
+  res_group <- group
+  res_term <- term
+  res_term_nr <- term_nr
 
-  # Check whether a term is provided, extract data if so, otherwise throw an error
+  # Filter the results based on the supplied information
+  if (!is.null(group)) {
+    res <- dplyr::filter(res, group == res_group)
+  }
   if (!is.null(term)) {
-    res <- res[res$term == term, ]
-  } else if (!is.null(term_nr)) {
-    res <- res[res$term_nr == term_nr, ]
-  } else {
-    stop("No term provided")
+    res <- dplyr::filter(res, term == res_term)
+  }
+  if (!is.null(term_nr)) {
+    res <- dplyr::filter(res, term_nr == res_term_nr)
   }
 
-  # Check if only a single statistic is asked, otherwise produce a full line of APA results
-  if (!is.null(statistic)) {
-    output <- res$value[res$statistic == statistic]
+  if (nrow(res) == 0) {
+    stop("No statistics found; did you supply the correct information?")
+  }
 
-    if (statistic == "p") {
-      if (output < .001) {
-        output <- "< .001"
-      } else {
-        output <- gsub(pattern = "0\\.", replacement = ".",
-                       x = format(output, digits = 2, nsmall = 2))
-      }
-    } else {
-      if (statistic != "df") {
-        output <- format(output, digits = 2, nsmall = 2)
-      }
+  if (first(pull(res, group) == "model")) {
+    # Check if all the necessary statistics are there to produce a line of
+    # output
+    if (sum(c("adjusted R squared", "F", "numerator df", "denominator df",
+      "p") %in% unique(res$statistic)) == 5) {
+
+      # TODO: Perhaps make adjusted R squared optional
+
+      # Extract statistics
+      adj_r  <- dplyr::pull(dplyr::filter(res,
+        statistic == "adjusted R squared"), value)
+      f <- dplyr::pull(dplyr::filter(res, statistic == "F"), value)
+      df_num <- dplyr::pull(dplyr::filter(res, statistic == "numerator df"),
+        value)
+      df_den <- dplyr::pull(dplyr::filter(res, statistic == "denominator df"),
+        value)
+      p <- dplyr::pull(dplyr::filter(res, statistic == "p"), value)
+
+      adj_r <- report_statistic("adjusted R squared", adj_r)
+      f <- report_statistic("F", f)
+      p <- report_p_value(p)
+
+      output <- paste0("adj. *R\u00B2* = ", adj_r, ", *F*(", df_num, ", ", df_den,
+        ") = ", f, ", ", p)
     }
-  } else {
-    if (res$term[1] == "(Model)") {
-      adj_r <- gsub(pattern = "0\\.", replacement = ".",
-                    x = format(res$value[res$statistic == "adjusted R squared"],
-                               digits = 2, nsmall = 2))
-      f <- format(res$value[res$statistic == "F"], digits = 2, nsmall = 2)
-      df_num <- res$value[res$statistic == "numerator df"]
-      df_den <- res$value[res$statistic == "denominator df"]
-      p <- report_p_value(res$value[res$statistic == "p"])
 
-      output <- paste0("adjusted *R*^2^ = ", adj_r, ", *F*(", df_num, ", ",
-                            df_den, ") = ", f, ", ", p)
-    } else {
-      b <- format(res$value[res$statistic == "b"], digits = 2, nsmall = 2)
-      SE <- format(res$value[res$statistic == "SE"], digits = 2, nsmall = 2)
-      t <- format(res$value[res$statistic == "t"], digits = 2, nsmall = 2)
-      df <- res$value[res$statistic == "df"]
-      p = report_p_value(res$value[res$statistic == "p"])
+  } else {
+    # Check if all the necessary statistics are there to produce a line of
+    # output
+    if (sum(c("b", "SE", "t", "df", "p") %in% unique(res$statistic)) == 5) {
+      b <- dplyr::pull(dplyr::filter(res, statistic == "b"), value)
+      SE <- dplyr::pull(dplyr::filter(res, statistic == "SE"), value)
+      t <- dplyr::pull(dplyr::filter(res, statistic == "t"), value)
+      df <- dplyr::pull(dplyr::filter(res, statistic == "df"), value)
+      p <- dplyr::pull(dplyr::filter(res, statistic == "p"), value)
+
+      b <- report_statistic("b", b)
+      SE <- report_statistic("SE", SE)
+      t <- report_statistic("t", t)
+      p <- report_p_value(p)
+
+      output <- paste0("*b* = ", b, ", *SE* = ", SE, ", *t*(",  df, ") = ",
+        t, ", ", p)
 
       # Guess whether confidence intervals are included
-      res_CI <- filter(res, str_detect(statistic, "[1234567890] %"))
+      res_CI <- dplyr::filter(res, stringr::str_detect(statistic, "[1234567890]% CI"))
 
-      if (nrow(res_CI) > 0) {
-        CI_pct <- as.numeric(str_replace(res_CI$statistic, " %", ""))
-        CI_pct <- CI_pct[2] - CI_pct[1]
+      # Add confidence interval, if it exists
+      if ("[0-9]% CI" %in% dplyr::pull(res, statistic)) {
+        res_CI <- dplyr::filter(res, stringr::str_detect(statistic, "[0-9]+% CI"))
 
-        CI_value1 <- format(res_CI$value[1], nsmall = 2, digits = 2)
-        CI_value2 <- format(res_CI$value[2], nsmall = 2, digits = 2)
+        CI_pct <- readr::parse_number(first(pull(res_CI, statistic)))
 
-        CI <- paste0(CI_pct, "% CI ", "[", CI_value1, ", ", CI_value2, "]")
-      }
+        CI_lower <- dplyr::pull(res_CI, value)[1]
+        CI_upper <- dplyr::pull(res_CI, value)[2]
 
-      # Return output
-      if (nrow(res_CI) > 0) {
-        output <- paste0("*b* = ", b, ", *SE* = ", SE, ", *t*(",  df, ") = ", t, ", ", p, ", ", CI)
-      } else {
-        output <- paste0("*b* = ", b, ", *SE* = ", SE, ", *t*(",  df, ") = ", t, ", ", p)
+        CI_lower <- report_statistic("CI", CI_lower)
+        CI_upper <- report_statistic("CI", CI_upper)
+
+        CI <- paste0(CI_pct, "% CI ", "[", CI_lower, ", ", CI_upper, "]")
+
+        output <- paste0(output, ", ", CI)
       }
     }
   }

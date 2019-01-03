@@ -8,30 +8,42 @@
 #' @details The \code{prettyNum} function is used to format the numbers before saving them to disk. This is to prevent saving numbers with many decimals.
 #'
 #' @examples
+#' library(dplyr)
+#'
 #' # Create an empty list to store the results in
 #' results <- list()
 #'
 #' # Conduct statistical tests
-#' model <- t.test(extra ~ group, data = sleep, paired = TRUE)
+#' model1 <- t.test(anxiety ~ condition, data = cox)
+#' model2 <- cor.test(cox$anxiety, cox$avoidance)
 #'
 #' # Add output to the results list
-#' results <- add_stats(model, results, identifier = "M1")
+#' results <- results %>%
+#'   add_stats(model1, identifier = "M1") %>%
+#'   add_stats(model2, identifier = "M2")
 #'
 #' # Save the results
 #' dir <- tempdir()
 #' write_stats(results, file.path(dir, "results.txt"))
 #'
-#' @import readr
-#'
 #' @export
 
 write_stats <- function(results, path) {
+
+  # Check whether the arguments are supplied
+  if (!is.list(results)) {
+    stop("argument 'results' is not a list")
+  }
+
+  if (is.null(path)) {
+    stop()
+  }
 
   # Convert list to a data frame
   df <- stats_list_to_df(results)
 
   # Round the stats values
-  df$value <- prettyNum(df$value)
+  df <- mutate(df, value = prettyNum(value))
 
   # Write to disk
   readr::write_csv(df, path = path, na = "")

@@ -5,7 +5,8 @@
 \title{Report function}
 \usage{
 report(identifier, term = NULL, term_nr = NULL, var = NULL,
-  group = NULL, statistic = NULL, results = getOption("tidystats_list"))
+  group = NULL, statistic = NULL,
+  results = getOption("tidystats_list"))
 }
 \arguments{
 \item{identifier}{A character string identifying the model.}
@@ -16,7 +17,7 @@ report(identifier, term = NULL, term_nr = NULL, var = NULL,
 
 \item{var}{A character string identifying the variable.}
 
-\item{group}{A character string identifying the group/}
+\item{group}{A character string identifying the group.}
 
 \item{statistic}{A character string of a statistic you want to extract from a model.}
 
@@ -36,16 +37,20 @@ results <- read_stats(system.file("results.csv", package = "tidystats"))
 options(tidystats_list = results)
 
 # Example: t-test
-report("t_test")
+report("t_test_one_sample")
+report("t_test_welch")
 
-# Example: correlation, r statistic only
-report("correlation", statistic = "p")
-
-# Example: regression term
-report("regression", term = "groupTrt")
-report("regression", term_nr = 2)
+# Example: correlation
+report("correlation_pearson")
+report("correlation_spearman")
 
 # Example: ANOVA
-report("ANOVA", term = "N")
+report("aov_two_way", term = "condition")
+report("aov_two_way", term = "sex")
+
+# Example: Linear models
+report("lm_simple", term = "conditionmortality salience")
+report("lm_simple", term_nr = 2)
+report("lm_simple", group = "model")
 
 }

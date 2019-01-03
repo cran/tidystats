@@ -4,22 +4,29 @@
 \alias{add_stats_to_model}
 \title{Add statistical output to a model in a tidy stats list}
 \usage{
-add_stats_to_model(output, results, identifier, statistics = NULL)
+add_stats_to_model(results, output, identifier, class = NULL)
 }
 \arguments{
-\item{output}{output of a statistical test.}
+\item{results}{A tidystats list.}
 
-\item{results}{a tidy stats list.}
+\item{output}{Output of a statistical test.}
 
-\item{identifier}{a character string identifying the model.}
+\item{identifier}{A character string identifying the model.}
 
-\item{statistics}{a vector of statistics to select from the output and add to the model in the tidy stats list.}
+\item{class}{A character string to indicate which function was used to
+produce the output. See 'Details' for a list of supported functions.}
 }
 \description{
-\code{add_stats_to_model} adds output to a model in a tidy results list. Sometimes you have to run additional analyses on the output of a statistical test, so you want to add these results to an existing model in a tidy stats list.
+\code{add_stats_to_model} adds output to a model in a tidy results list.
+Sometimes you have to run additional analyses on the output of a statistical
+test, so you want to add these results to an existing model in a tidy stats
+list.
+}
+\details{
+Supported classes are:
+- \code{confint}
 }
 \examples{
-library(magrittr)
 
 # Create an empty list to store the results in
 results <- list()
@@ -33,14 +40,13 @@ weight <- c(ctl, trt)
 model <- lm(weight ~ group)
 
 # Add output to the results list
-results <- add_stats(model, results, identifier = "M1")
+results <- add_stats(results, model, identifier = "M1")
 
 # Get confidence intervals of the model
 model_CIs <- confint(model)
 
-# Produce a tidy data frame of the CIs and add it to the results list
-results <- model_CIs \%>\%
-  tidy_stats_confint() \%>\%
-  add_stats_to_model(results, identifier = "M1")
+# Add it to the results list
+results <- add_stats_to_model(results, model_CIs, identifier = "M1",
+  class = "confint")
 
 }

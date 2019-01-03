@@ -4,26 +4,38 @@
 \alias{add_stats.data.frame}
 \title{add_stats data frame function}
 \usage{
-\method{add_stats}{data.frame}(output, results, identifier = NULL,
-  statistics = NULL, type = NULL, confirmatory = NULL, notes = NULL)
+\method{add_stats}{data.frame}(results, output, identifier = NULL,
+  type = NULL, confirmatory = NULL, notes = NULL, class = NULL)
 }
 \arguments{
+\item{results}{A tidystats list.}
+
 \item{output}{A data frame that contains statistical output in a tidy format.}
 
-\item{results}{A tidy stats list.}
+\item{identifier}{A character string identifying the model. Automatically
+created if not provided.}
 
-\item{identifier}{A character string identifying the model. Automatically created if not provided.}
+\item{type}{A character string indicating the type of test. One of
+"hypothesis", "manipulation check", "contrast", "descriptives", or "other".
+Can be abbreviated.}
 
-\item{statistics}{A vector of statistics to select from the output and add to the tidy stats list.}
+\item{confirmatory}{A boolean to indicate whether the statistical test was
+confirmatory (TRUE) or exploratory (FALSE). Can be NA.}
 
-\item{type}{A character string indicating the type of test. One of "hypothesis", "manipulation check", "contrast", "descriptives", or "other". Can be abbreviated.}
+\item{notes}{A character string to add additional information. Some
+statistical tests produce notes information, which will be overwritten if
+notes are provided.}
 
-\item{confirmatory}{A boolean to indicate whether the statistical test was confirmatory (TRUE) or exploratory (FALSE). Can be NA.}
-
-\item{notes}{A character string to add additional information. Some statistical tests produce notes information, which will be overwritten if notes are provided.}
+\item{class}{Unused.}
 }
 \description{
-\code{add_stats.data.frame} is a function to add a tidy data frame of results to a tidy stats list. tidystats does not support all possible statistical tests, so it may not be able to produce tidy output of a statistical model. The best solution for now is to tidy the output of a statistical test yourself, creating a tidy data frame, and then use \code{add_stats}, which will call this function, to add it to the tidy stats list.
+\code{add_stats.data.frame} is a function to add a tidy data frame of
+results to a tidystats list. tidystats does not support all possible
+statistical tests, so it may not be able to produce tidy output of a
+statistical model. The best solution for now is to tidy the output of a
+statistical test yourself, creating a tidy data frame, and then use
+\code{add_stats}, which will call this function, to add it to the tidystats
+list.
 }
 \examples{
 
@@ -38,6 +50,6 @@ x_squared_data <- data.frame(
   )
 
 # Add results to results
-results <- add_stats(x_squared_data, results)
+results <- add_stats(results, x_squared_data)
 
 }

@@ -4,19 +4,20 @@
 \alias{report_lm}
 \title{Report method for linear regression models}
 \usage{
-report_lm(results, identifier, term = NULL, term_nr = NULL,
-  statistic = NULL)
+report_lm(identifier, group = NULL, term = NULL, term_nr = NULL,
+  results = getOption("tidystats_list"))
 }
 \arguments{
-\item{results}{A tidy stats list.}
-
 \item{identifier}{A character string identifying the model.}
 
-\item{term}{A character string indicating which term you want to report the statistics of.}
+\item{group}{A character string indicating the group containing the
+statistics you want to report.}
 
-\item{term_nr}{A number indicating which term you want to report the the statistics of.}
+\item{term}{A character string indicating the term you want to report.}
 
-\item{statistic}{A character string of a statistic you want to extract from a model.}
+\item{term_nr}{A number indicating the term you want to report.}
+
+\item{results}{A tidystats list.}
 }
 \description{
 Function to report a regression in APA style.
@@ -28,9 +29,9 @@ results <- read_stats(system.file("results.csv", package = "tidystats"))
 # Set the default results list
 options(tidystats_list = results)
 
-# Example: regression term
-report("regression", term = "groupTrt")
-report("regression", term_nr = 2)
-report("regression", term = "groupTrt", statistic = "p")
+# Report results
+report("lm_simple", term = "conditionmortality salience")
+report("lm_simple", term_nr = 2)
+report("lm_simple", group = "model")
 
 }
