@@ -1,50 +1,52 @@
-#' Save the results in a tidy stats list to a .csv file
+#' Write a tidystats list to a file
 #'
-#' \code{write_stats} converts a tidy stats results list to a data frame and then saves the data to a .csv file.
+#' \code{write_stats} writes a tidystats list to a .json file.
 #'
-#' @param results A tidy stats list.
+#' @param x A tidystats list.
 #' @param path Path or connection to write to.
-#'
-#' @details The \code{prettyNum} function is used to format the numbers before saving them to disk. This is to prevent saving numbers with many decimals.
-#'
-#' @examples
+#' 
+#' @examples 
+#' # Load dplyr for access to the piping operator
 #' library(dplyr)
-#'
-#' # Create an empty list to store the results in
-#' results <- list()
-#'
+#' 
 #' # Conduct statistical tests
-#' model1 <- t.test(anxiety ~ condition, data = cox)
-#' model2 <- cor.test(cox$anxiety, cox$avoidance)
-#'
+#' # t-test:
+#' sleep_test <- t.test(extra ~ group, data = sleep, paired = TRUE)
+#' 
+#' # lm:
+#' ctl <- c(4.17,5.58,5.18,6.11,4.50,4.61,5.17,4.53,5.33,5.14)
+#' trt <- c(4.81,4.17,4.41,3.59,5.87,3.83,6.03,4.89,4.32,4.69)
+#' group <- gl(2, 10, 20, labels = c("Ctl","Trt"))
+#' weight <- c(ctl, trt)
+#' lm_D9 <- lm(weight ~ group)
+#' 
+#' # ANOVA:
+#' npk_aov <- aov(yield ~ block + N*P*K, npk)
+#' 
+#' #' # Create an empty list
+#' results <- list()
+#' 
 #' # Add output to the results list
 #' results <- results %>%
-#'   add_stats(model1, identifier = "M1") %>%
-#'   add_stats(model2, identifier = "M2")
+#'   add_stats(sleep_test) %>%
+#'   add_stats(lm_D9, type = "primary", preregistered = TRUE) %>%
+#'   add_stats(npk_aov, notes = "An ANOVA example")
 #'
 #' # Save the results
 #' dir <- tempdir()
-#' write_stats(results, file.path(dir, "results.txt"))
+#' write_stats(results, file.path(dir, "results.json"))
 #'
 #' @export
-
-write_stats <- function(results, path) {
+write_stats <- function(x, path) {
 
   # Check whether the arguments are supplied
-  if (!is.list(results)) {
-    stop("argument 'results' is not a list")
+  if (!is.list(x)) {
+    stop("Argument 'x' is not a list.")
   }
-
   if (is.null(path)) {
-    stop()
+    stop("No path or connection found.")
   }
-
-  # Convert list to a data frame
-  df <- stats_list_to_df(results)
-
-  # Round the stats values
-  df <- mutate(df, value = prettyNum(value))
 
   # Write to disk
-  readr::write_csv(df, path = path, na = "")
+  jsonlite::write_json(x, path = path, pretty = TRUE, auto_unbox = TRUE)
 }

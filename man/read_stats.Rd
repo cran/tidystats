@@ -2,7 +2,7 @@
 % Please edit documentation in R/read_stats.R
 \name{read_stats}
 \alias{read_stats}
-\title{Read a .csv file that was produced with \code{write_stats}}
+\title{Read a .json file that was produced with \code{write_stats}}
 \usage{
 read_stats(file)
 }
@@ -10,9 +10,11 @@ read_stats(file)
 \item{file}{Path to the tidy stats data file}
 }
 \description{
-\code{read_stats} can convert a .csv file containing the statistical results that was produced with \code{write_stats}. It returns a list containing the results, with the identifier as the name for each list element.
+\code{read_stats} can read in a .json file containing the statistical output
+that was produced with \code{write_stats}. It returns a list containing the 
+results, with the identifier as the name for each list element.
 }
 \examples{
-results <- read_stats(system.file("results.csv", package = "tidystats"))
+results <- read_stats(system.file("results.json", package = "tidystats"))
 
 }
