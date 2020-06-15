@@ -1,10 +1,21 @@
+---
+output:
+  md_document:
+    variant: gfm
+permalink: /index.html
+---
+
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-<p align="center">
-  <img src="https://github.com/WillemSleegers/tidystats/blob/master/inst/hex.png" width = 150 align = center alt="tidystats logo"/>
-</p>
+<img src="man/figures/hex.png" width=150 alt="tidystats Logo"/>
 
 tidystats
+
+<!-- badges: start -->
+[![CRAN status](https://www.r-pkg.org/badges/version/tidystats)](https://cran.r-project.org/package=tidystats)
+[![R build status](https://github.com/willemsleegers/tidystats/workflows/R-CMD-check/badge.svg)](https://github.com/willemsleegers/tidystats/actions?workflow=R-CMD-check)
+
+<!-- badges: end -->
 ---------------
 
 **Author:** [Willem Sleegers](https://www.willemsleegers.com/)
@@ -81,8 +92,10 @@ find fruitful.
 - `oneway.test()`
 - `aov()`
 - `lm()`
+- `anova()`
 
 ### Example
+
 
 
 
@@ -122,154 +135,6 @@ models. If you want to see what this file looks like, you can inspect it [here](
 
 If you want to report the statistics in a manuscript, you can soon do so with a
 Word add-in that is currently in development.
-
-## Reading in a tidystats file
-
-An additional usage of the tidystats-produced file is that it can be read back
-into R and converted into a data frame. This enables researchers to then 
-extract specific statistics to perform additional analyses with 
-(e.g., meta-analyses). Below is an example.
-
-
-```r
-# Read in a tidystats-produced .json file
-results <- read_stats("results.json")
-
-# Convert the list to a data frame
-results_df <- tidy_stats_to_data_frame(results)
-
-# Select the p-values
-p_values <- filter(results_df, statistic == "p")
-```
-
-With the current example, this results in the following data frame:
-
-<table class="table" style="width: auto !important; margin-left: auto; margin-right: auto;">
- <thead>
-  <tr>
-   <th style="text-align:left;"> identifier </th>
-   <th style="text-align:left;"> method </th>
-   <th style="text-align:left;"> group </th>
-   <th style="text-align:left;"> term </th>
-   <th style="text-align:left;"> statistic </th>
-   <th style="text-align:right;"> value </th>
-   <th style="text-align:left;"> type </th>
-   <th style="text-align:left;"> preregistered </th>
-  </tr>
- </thead>
-<tbody>
-  <tr>
-   <td style="text-align:left;"> sleep_test </td>
-   <td style="text-align:left;"> Paired t-test </td>
-   <td style="text-align:left;">  </td>
-   <td style="text-align:left;">  </td>
-   <td style="text-align:left;"> p </td>
-   <td style="text-align:right;"> 0.0028 </td>
-   <td style="text-align:left;"> primary </td>
-   <td style="text-align:left;">  </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> lm_D9 </td>
-   <td style="text-align:left;"> Linear regression </td>
-   <td style="text-align:left;"> coefficients </td>
-   <td style="text-align:left;"> (Intercept) </td>
-   <td style="text-align:left;"> p </td>
-   <td style="text-align:right;"> 0.0000 </td>
-   <td style="text-align:left;">  </td>
-   <td style="text-align:left;"> no </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> lm_D9 </td>
-   <td style="text-align:left;"> Linear regression </td>
-   <td style="text-align:left;"> coefficients </td>
-   <td style="text-align:left;"> groupTrt </td>
-   <td style="text-align:left;"> p </td>
-   <td style="text-align:right;"> 0.2490 </td>
-   <td style="text-align:left;">  </td>
-   <td style="text-align:left;"> no </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> lm_D9 </td>
-   <td style="text-align:left;"> Linear regression </td>
-   <td style="text-align:left;"> model </td>
-   <td style="text-align:left;">  </td>
-   <td style="text-align:left;"> p </td>
-   <td style="text-align:right;"> 0.2490 </td>
-   <td style="text-align:left;">  </td>
-   <td style="text-align:left;"> no </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> npk_aov </td>
-   <td style="text-align:left;"> ANOVA </td>
-   <td style="text-align:left;">  </td>
-   <td style="text-align:left;"> block </td>
-   <td style="text-align:left;"> p </td>
-   <td style="text-align:right;"> 0.0159 </td>
-   <td style="text-align:left;">  </td>
-   <td style="text-align:left;">  </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> npk_aov </td>
-   <td style="text-align:left;"> ANOVA </td>
-   <td style="text-align:left;">  </td>
-   <td style="text-align:left;"> N </td>
-   <td style="text-align:left;"> p </td>
-   <td style="text-align:right;"> 0.0044 </td>
-   <td style="text-align:left;">  </td>
-   <td style="text-align:left;">  </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> npk_aov </td>
-   <td style="text-align:left;"> ANOVA </td>
-   <td style="text-align:left;">  </td>
-   <td style="text-align:left;"> P </td>
-   <td style="text-align:left;"> p </td>
-   <td style="text-align:right;"> 0.4749 </td>
-   <td style="text-align:left;">  </td>
-   <td style="text-align:left;">  </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> npk_aov </td>
-   <td style="text-align:left;"> ANOVA </td>
-   <td style="text-align:left;">  </td>
-   <td style="text-align:left;"> K </td>
-   <td style="text-align:left;"> p </td>
-   <td style="text-align:right;"> 0.0288 </td>
-   <td style="text-align:left;">  </td>
-   <td style="text-align:left;">  </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> npk_aov </td>
-   <td style="text-align:left;"> ANOVA </td>
-   <td style="text-align:left;">  </td>
-   <td style="text-align:left;"> N:P </td>
-   <td style="text-align:left;"> p </td>
-   <td style="text-align:right;"> 0.2632 </td>
-   <td style="text-align:left;">  </td>
-   <td style="text-align:left;">  </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> npk_aov </td>
-   <td style="text-align:left;"> ANOVA </td>
-   <td style="text-align:left;">  </td>
-   <td style="text-align:left;"> N:K </td>
-   <td style="text-align:left;"> p </td>
-   <td style="text-align:right;"> 0.1686 </td>
-   <td style="text-align:left;">  </td>
-   <td style="text-align:left;">  </td>
-  </tr>
-  <tr>
-   <td style="text-align:left;"> npk_aov </td>
-   <td style="text-align:left;"> ANOVA </td>
-   <td style="text-align:left;">  </td>
-   <td style="text-align:left;"> P:K </td>
-   <td style="text-align:left;"> p </td>
-   <td style="text-align:right;"> 0.8628 </td>
-   <td style="text-align:left;">  </td>
-   <td style="text-align:left;">  </td>
-  </tr>
-</tbody>
-</table>
 
 ## More resources
 

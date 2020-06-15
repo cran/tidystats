@@ -253,6 +253,406 @@ tidy_stats.lm <- function(x) {
   output$coefficients <- coefficients
   output$model <- model
   
+  # Add package information
+  package <- list()
+
+  package$name <- "stats"
+  package$version <- getNamespaceVersion("stats")[[1]]
+
+  # Add package information to output
+  output$package <- package
+  
+  return(output)
+}
+
+#' @describeIn tidy_stats tidy_stats method for class 'lmerMod'
+#' @export
+tidy_stats.lmerMod <- function(x) {
+  
+  output <- list()
+  
+  # Get summary statistics
+  summary <- summary(x)
+  
+  # Extract method
+  output$method <- "Linear mixed model"
+  
+  # Extract REML criterion at convergence
+  output$REML_criterion_at_convergence <- summary$AICtab
+  
+  # Add additional convergence information
+  output$convergence_code = summary$optinfo$conv$opt
+  output$convergence_message = summary$optinfo$conv$lme4$messages
+  
+  # Extract statistics into four categories:
+  # - Variance of each random effect
+  # - Correlations between random effects
+  # - Coefficients of each fixed effect
+  # - Correlations between fixed effects
+  
+  # Extract random effects
+  random <- list()
+  
+  # Set N to number of observations
+  random$N <- summary[[3]]$dims[1]
+  
+  # Get variance-covariance matrix
+  varcor <- summary$varcor
+  
+  # Loop over each group and set the variance statistics and correlations
+  groups <- list()
+
+  for (i in 1:length(varcor)) {
+    group <- list()
+    
+    group$name <- names(varcor)[i]
+  
+    # Set N for the group, if there is an N  
+    if (group$name %in% names(summary$ngrps)) {
+      group$N <- summary$ngrps[names(summary$ngrps) == group$name]
+    }
+    
+    random_statistics <- varcor[[i]]
+    
+    # Extract standard deviations
+    vars <- attr(random_statistics, "stddev")^2
+    SDs <- attr(random_statistics, "stddev")
+    
+    # Extract variances of each term in a group
+    terms <- list()
+    
+    for (j in 1:length(vars)) {
+      term <- list()
+      term$name <- names(vars)[j]
+      
+      # Extract statistics
+      statistics <- list()
+
+      statistics$var <- vars[j] 
+      statistics$SD <- SDs[j] 
+
+      term$statistics <- statistics
+      
+      terms[[j]] <- term
+    }
+      
+    # Add terms to group
+    group$variances <- terms
+    
+    # Extract correlation pairs, if there are any
+    random_cors <- attr(random_statistics, "correlation")  
+    
+    if (length(random_cors) > 1) {
+      
+      # Tidy the matrix
+      random_cors <- tidy_matrix(random_cors)
+      
+      pairs <- list()
+      
+      for (k in 1:nrow(random_cors)) {
+        pair <- list()
+        
+        names <- list()
+        names[[1]] <- random_cors$name1[k]
+        names[[2]] <- random_cors$name2[k]
+        
+        pair$names <- names
+        pair$statistics$r <- random_cors$value[k]
+        
+        pairs[[k]] <- pair
+      }
+      
+      group$correlations <- pairs
+    }
+    
+    # Add group to random
+    groups[[i]] <- group
+  }
+  
+  # Add residual statistics to the group
+  statistics <- list()
+  statistics$var <- attr(varcor, "sc")^2
+  statistics$SD <- attr(varcor, "sc")
+  
+  group <- list()
+  group$name <- "Residual"
+  group$variances[[1]]$statistics <- statistics
+  
+  groups[[i + 1]] <- group
+  
+  # Add groups to random
+  random$groups <- groups
+  
+  # Add random to output
+  output$random_effects <- random
+  
+  # Extract fixed effects
+  fixed <- list()
+  
+  # Get coefficient statistics
+  coefficients <- list()
+  coef <- coef(summary)
+
+  # Loop over the terms
+  for (i in 1:nrow(coef)) {
+    
+    term <- list()
+    
+    # Add the name of the coefficient
+    name <- rownames(coef)[i]
+    term$name <- name
+    
+    # Create a new statistics list and add the fixed effect's statistics
+    statistics <- list()
+    
+    statistics$estimate <- coef[name, "Estimate"]
+    statistics$SE <- coef[name, "Std. Error"]
+    
+    statistic <- list()
+    statistic$name <- "t"
+    statistic$value <- coef[name, "t value"]
+    statistics$statistic <- statistic
+    
+    term$statistics <- statistics
+    
+    # Add the term to the coefficients list
+    coefficients[[i]] <- term
+  }
+  
+  output$fixed_effects$coefficients <- coefficients
+  
+  # Extract fixed correlations
+  fixed_cors <- attr(summary$vcov, "factors")$correlation
+  
+  if (length(fixed_cors) > 1) {
+    
+    # Tidy the matrix
+    fixed_cors <- tidy_matrix(fixed_cors)
+    
+    pairs <- list()
+    
+    for (i in 1:nrow(fixed_cors)) {
+      pair <- list()
+      names <- list()
+      names[[1]] <- fixed_cors$name1[i]
+      names[[2]] <- fixed_cors$name2[i]
+      value <- fixed_cors$value[i]
+      
+      pair$names <- names
+      pair$statistics$r <- value
+      
+      pairs[[i]] <- pair
+    }
+    
+    output$fixed_effects$correlations <- pairs
+  }
+  
+  # Add package information
+  package <- list()
+
+  package$name <- "lme4"
+  package$version <- getNamespaceVersion("lme4")[[1]]
+
+  # Add package information to output
+  output$package <- package
+  
+  return(output)
+}
+
+#' @describeIn tidy_stats tidy_stats method for class 'lmerModLmerTest'
+#' @export
+tidy_stats.lmerModLmerTest <- function(x) {
+  
+  output <- list()
+  
+  # Get summary statistics
+  summary <- summary(x)
+  
+  # Extract method
+  output$method <- "Linear mixed model"
+  
+  # Extract REML criterion at convergence
+  output$REML_criterion_at_convergence <- summary$AICtab
+  
+  # Add additional convergence information
+  output$convergence_code = summary$optinfo$conv$opt
+  output$convergence_message = summary$optinfo$conv$lme4$messages
+  
+  # Extract statistics into four categories:
+  # - Variance of each random effect
+  # - Correlations between random effects
+  # - Coefficients of each fixed effect
+  # - Correlations between fixed effects
+  
+  # Extract random effects
+  random <- list()
+  
+  # Set N to number of observations
+  random$N <- summary[[3]]$dims[1]
+  
+  # Get variance-covariance matrix
+  varcor <- summary$varcor
+  
+  # Loop over each group and set the variance statistics and correlations
+  groups <- list()
+
+  for (i in 1:length(varcor)) {
+    group <- list()
+    
+    group$name <- names(varcor)[i]
+  
+    # Set N for the group, if there is an N  
+    if (group$name %in% names(summary$ngrps)) {
+      group$N <- summary$ngrps[names(summary$ngrps) == group$name]
+    }
+    
+    random_statistics <- varcor[[i]]
+    
+    # Extract standard deviations
+    vars <- attr(random_statistics, "stddev")^2
+    SDs <- attr(random_statistics, "stddev")
+    
+    # Extract variances of each term in a group
+    terms <- list()
+    
+    for (j in 1:length(vars)) {
+      term <- list()
+      term$name <- names(vars)[j]
+      
+      # Extract statistics
+      statistics <- list()
+
+      statistics$var <- vars[j] 
+      statistics$SD <- SDs[j] 
+
+      term$statistics <- statistics
+      
+      terms[[j]] <- term
+    }
+      
+    # Add terms to group
+    group$variances <- terms
+    
+    # Extract correlation pairs, if there are any
+    random_cors <- attr(random_statistics, "correlation")  
+    
+    if (length(random_cors) > 1) {
+      
+      # Tidy the matrix
+      random_cors <- tidy_matrix(random_cors)
+      
+      pairs <- list()
+      
+      for (k in 1:nrow(random_cors)) {
+        pair <- list()
+        
+        names <- list()
+        names[[1]] <- random_cors$name1[k]
+        names[[2]] <- random_cors$name2[k]
+        
+        pair$names <- names
+        pair$statistics$r <- random_cors$value[k]
+        
+        pairs[[k]] <- pair
+      }
+      
+      group$correlations <- pairs
+    }
+    
+    # Add group to random
+    groups[[i]] <- group
+  }
+  
+  # Add residual statistics to the group
+  statistics <- list()
+  statistics$var <- attr(varcor, "sc")^2
+  statistics$SD <- attr(varcor, "sc")
+  
+  group <- list()
+  group$name <- "Residual"
+  group$variances[[1]]$statistics <- statistics
+  
+  groups[[i + 1]] <- group
+  
+  # Add groups to random
+  random$groups <- groups
+  
+  # Add random to output
+  output$random_effects <- random
+  
+  # Extract fixed effects
+  fixed <- list()
+  
+  # Get coefficient statistics
+  coefficients <- list()
+  coef <- coef(summary)
+
+  # Loop over the terms
+  for (i in 1:nrow(coef)) {
+    
+    term <- list()
+    
+    # Add the name of the coefficient
+    name <- rownames(coef)[i]
+    term$name <- name
+    
+    # Create a new statistics list and add the fixed effect's statistics
+    statistics <- list()
+    
+    statistics$estimate <- coef[name, "Estimate"]
+    statistics$SE <- coef[name, "Std. Error"]
+    statistics$df <- coef[name, "df"]
+    
+    statistic <- list()
+    statistic$name <- "t"
+    statistic$value <- coef[name, "t value"]
+    statistics$statistic <- statistic
+    
+    statistics$p <- coef[name, "Pr(>|t|)"]
+    
+    term$statistics <- statistics
+    
+    # Add the term to the coefficients list
+    coefficients[[i]] <- term
+  }
+  
+  output$fixed_effects$coefficients <- coefficients
+  
+  # Extract fixed correlations
+  fixed_cors <- attr(summary$vcov, "factors")$correlation
+  
+  if (length(fixed_cors) > 1) {
+    
+    # Tidy the matrix
+    fixed_cors <- tidy_matrix(fixed_cors)
+    
+    pairs <- list()
+    
+    for (i in 1:nrow(fixed_cors)) {
+      pair <- list()
+      names <- list()
+      names[[1]] <- fixed_cors$name1[i]
+      names[[2]] <- fixed_cors$name2[i]
+      value <- fixed_cors$value[i]
+      
+      pair$names <- names
+      pair$statistics$r <- value
+      
+      pairs[[i]] <- pair
+    }
+    
+    output$fixed_effects$correlations <- pairs
+  }
+  
+  # Add package information
+  package <- list()
+
+  package$name <- "lme4"
+  package$version <- getNamespaceVersion("lme4")[[1]]
+
+  # Add package information to output
+  output$package <- package
+  
   return(output)
 }
 
@@ -313,6 +713,15 @@ tidy_stats.aov <- function(x) {
   
   # Add coefficients to the output
   output$coefficients <- coefficients
+  
+  # Add package information
+  package <- list()
+
+  package$name <- "stats"
+  package$version <- getNamespaceVersion("stats")[[1]]
+
+  # Add package information to output
+  output$package <- package
   
   return(output)
 }
@@ -394,6 +803,15 @@ tidy_stats.aovlist <- function(x) {
   # Add groups to the output
   output$groups <- groups
  
+  # Add package information
+  package <- list()
+
+  package$name <- "stats"
+  package$version <- getNamespaceVersion("stats")[[1]]
+
+  # Add package information to output
+  output$package <- package
+  
   return(output)
 }
 
@@ -497,3 +915,239 @@ tidy_stats.tidystats_descriptives <- function(x) {
   return(output)
 }
 
+#' @describeIn tidy_stats tidy_stats method for class 'tidystats_counts'
+#' @export
+tidy_stats.tidystats_counts <- function(x) {
+
+  output <- list()
+  
+  # Add method
+  output$method <- "Counts"
+  
+  # Extract grouping variables
+  group_names <- names(x)[!names(x) %in% c("n", "pct")]
+  output$group_by <- paste(group_names, collapse = " - ")
+  
+  # Combine grouping variables into a single column
+  x <- tidyr::unite(x, col = "group", dplyr::all_of(group_names), sep = " - ")
+  
+  # Create an empty groups list
+  groups <- list()
+  
+  # Loop over each row in the data frame and extract the statistics
+  for (i in 1:nrow(x)) {
+    # Create an empty group list
+    group <- list()
+    
+    # Select the current row
+    row <- x[i, ]
+    
+    # Set the group name
+    group$name <- row$group
+      
+    # Extract statistics
+    statistics <- list()
+    
+    if ("n" %in% names(row)) statistics$n <- row$n
+    if ("pct" %in% names(row)) statistics$pct <- row$pct
+    
+    # Add the statistics to the variable's statistics property
+    group$statistics <- statistics    
+      
+    # Add the group to the groups list
+    groups[[i]] <- group
+    
+    # Add the groups list to the variable list
+    output$groups <- groups
+  }
+  
+  # Add package information
+  package <- list()
+
+  package$name <- "tidystats"
+  package$version <- getNamespaceVersion("tidystats")[[1]]
+
+  # Add package information to output
+  output$package <- package
+  
+  return(output)
+}
+
+#' @describeIn tidy_stats tidy_stats method for class 'anova'
+#' @export
+tidy_stats.anova <- function(x) {
+  
+  output <- list()
+  
+  # Add method information
+  output$method <- "ANOVA"
+  
+  # Create an empty coefficients list
+  coefficients <- list()
+  
+  # Convert the summary statistics format to a data frame
+  x <- tibble::as_tibble(x, rownames = "terms")
+  
+  # Trim spaces from the names of the terms
+  x <- dplyr::mutate(x, terms = stringr::str_trim(terms))
+  
+  for (i in 1:nrow(x)) {
+    
+    # Create a new coefficient list
+    coefficient <- list()
+    
+    # Add the name of the coefficient
+    name = x$terms[i]
+    coefficient$name <- name
+    
+    # Create a new statistics list and add the coefficient's statistics
+    statistics <- list()
+    
+    statistics$SS <- x$`Sum Sq`[i]
+    statistics$MS <- x$`Mean Sq`[i]
+    
+    if (name != "Residuals") {
+      statistic <- list()
+      statistic$name <- "F"
+      statistic$value <- x$`F value`[i]
+      statistics$statistic <- statistic
+    }
+    
+    statistics$df <- x$Df[i]
+    
+    if (name != "Residuals") {
+      statistics$p <- x$`Pr(>F)`[i]
+    }
+    
+    coefficient$statistics <- statistics
+    
+    # Add the coefficient data to the coefficients list
+    coefficients[[i]] <- coefficient
+  }
+  
+  # Add coefficients to the output
+  output$coefficients <- coefficients
+  
+  # Add package information
+  package <- list()
+
+  package$name <- "stats"
+  package$version <- getNamespaceVersion("stats")[[1]]
+
+  # Add package information to output
+  output$package <- package
+  
+  return(output)
+}
+
+#' @describeIn tidy_stats tidy_stats method for class 'BayesFactor'
+#' @export
+tidy_stats.BFBayesFactor <- function(x) {
+  
+  output <- list()
+  
+  # Determine the method
+  numerator <- x@numerator[[1]]
+  class <- class(numerator)[1]
+  output$method <- dplyr::case_when(
+    class == "BFoneSample" ~ "Bayesian t-test",
+    class == "BFlinearModel" ~ "Bayesian linear regression"
+  )
+  
+  # Create a statistics list
+  statistics <- list()
+  
+  # Create a bayes factor list and loop over the bayes factors, extract the 
+  # relevant statistics, and store them in separate lists
+  bayes_factors <- list()
+  bayes_factors_df <- as.data.frame(BayesFactor::extractBF(x))
+  
+  for (i in 1:nrow(bayes_factors_df)) {
+    bayes_factor <- list()
+    bayes_factor$name <- rownames(bayes_factors_df)[i]
+    
+    statistics <- list()
+    statistics$BF_01 <- bayes_factors_df$bf[i]
+    statistics$BF_10 <- 1/bayes_factors_df$bf[i]
+    statistics$error <- bayes_factors_df$error[i]
+    
+    bayes_factor$statistics <- statistics
+    bayes_factors[[i]] <- bayes_factor
+  }
+  
+  # Add bayes factors to the output
+  output$bayes_factors <- bayes_factors
+  
+  # Add package information
+  package <- list()
+
+  package$name <- "BayesFactor"
+  package$version <- getNamespaceVersion("BayesFactor")[[1]]
+
+  # Add package information to output
+  output$package <- package
+  
+  return(output)
+}
+
+#' @describeIn tidy_stats tidy_stats method for class 'afex_aov'
+#' @export
+tidy_stats.afex_aov <- function(x) {
+
+  output <- list()
+  
+  # Set method
+  output$method <- "ANOVA"
+  
+  # Set the DV
+  output$DV <- attr(x, "dv")
+  
+  # Create an empty coefficients list
+  coefficients <- list()
+  
+  # Convert the results to a data frame
+  effects <- tibble::as_tibble(x$anova_table, rownames = "effect")
+  
+  for (i in 1:nrow(effects)) {
+    
+    # Create a new coefficient list
+    coefficient <- list()
+    
+    # Add the name of the coefficient
+    name <- effects$effect[i]
+    coefficient$name <- name
+    
+    # Create a new statistics list and add the coefficient's statistics
+    statistics <- list()
+    
+    statistics$dfs <- list(numerator_df = effects$`num Df`[i], 
+      denominator_df = effects$`den Df`[i])
+    statistics$MS <- effects$MSE[i]
+    statistics$statistic <- list(name = "F", value = effects$`F`[i])
+    statistics$p <- effects$`Pr(>F)`[i]
+    statistics$ges <- effects$ges[i]
+    
+    coefficient$statistics <- statistics
+    
+    # Add the coefficient data to the coefficients list
+    coefficients[[i]] <- coefficient
+  }
+  
+  # Add coefficients to the output
+  output$coefficients <- coefficients
+  
+  # Add additional information
+  output$type <- attr(x, "type")
+  output$sphericity_correction_method <- attr(x$anova_table, "correction")
+  
+  # Add package information
+  package <- list()
+
+  package$name <- "afex"
+  package$version <- getNamespaceVersion("afex")[[1]]
+
+  # Add package information to output
+  output$package <- package
+  
+  return(output)
+}
