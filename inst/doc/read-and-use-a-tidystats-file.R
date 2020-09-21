@@ -4,7 +4,7 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 
-## ----read-example, eval = FALSE, message = FALSE------------------------------
+## ----example1_eval, eval = FALSE, message = FALSE-----------------------------
 #  # Load packages
 #  library(tidystats)
 #  library(dplyr)
@@ -18,12 +18,12 @@ knitr::opts_chunk$set(
 #  # Select the p-values
 #  p_values <- filter(results_df, statistic == "p")
 
-## ----read-example-table, message = FALSE, echo = FALSE------------------------
+## ----example1_no_eval, message = FALSE, echo = FALSE--------------------------
 library(tidystats)
 library(dplyr)
 library(knitr)
 
-results <- read_stats("../inst/results.json")
+results <-read_stats(system.file("results.json", package = "tidystats"))
 results_df <- tidy_stats_to_data_frame(results)
 
 p_values <- filter(results_df, statistic == "p")
@@ -31,6 +31,16 @@ p_values <- filter(results_df, statistic == "p")
 options(knitr.kable.NA = '')
 
 p_values %>%
+  select(-extra) %>%
+  kable(format = "markdown")
+
+## ----example2_no_eval, eval = FALSE-------------------------------------------
+#  sig_p_values <- filter(results_df, statistic == "p" & value < .05)
+
+## ----example2_eval, echo = FALSE----------------------------------------------
+sig_p_values <- filter(results_df, statistic == "p" & value < .05)
+
+sig_p_values %>%
   select(-extra) %>%
   kable(format = "markdown")
 

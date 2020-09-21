@@ -19,6 +19,8 @@
 #' 
 #' @details 
 #' Currently supported functions:
+#' 
+#' \code{stats}:
 #' \itemize{
 #'   \item \code{t.test()}
 #'   \item \code{cor.test()}
@@ -26,8 +28,34 @@
 #'   \item \code{wilcox.test()}
 #'   \item \code{fisher.test()}
 #'   \item \code{oneway.test()}
-#'   \item \code{aov()}
 #'   \item \code{lm()}
+#'   \item \code{glm()}
+#'   \item \code{aov()}
+#'   \item \code{anova()}
+#' }
+#' 
+#' \code{lme4}/\code{lmerTest}:
+#' \itemize{
+#'   \item \code{lmer()}
+#' }
+#' 
+#' \code{BayesFactor}:
+#' \itemize{
+#'   \item \code{generalTestBF()}
+#'   \item \code{lmBF()}
+#'   \item \code{regressionBF()}
+#'   \item \code{ttestBF()}
+#'   \item \code{anovaBF()}
+#'   \item \code{correlationBF()}
+#'   \item \code{contingencyTableBF()}
+#'   \item \code{proportionBF()}
+#'   \item \code{meta.ttestBF()}
+#' }
+#' 
+#' \code{tidystats}:
+#' \itemize{
+#'   \item \code{describe_data()}
+#'   \item \code{count_data()}
 #' }
 #' 
 #' @examples 
@@ -39,9 +67,9 @@
 #' sleep_test <- t.test(extra ~ group, data = sleep, paired = TRUE)
 #' 
 #' # lm:
-#' ctl <- c(4.17,5.58,5.18,6.11,4.50,4.61,5.17,4.53,5.33,5.14)
-#' trt <- c(4.81,4.17,4.41,3.59,5.87,3.83,6.03,4.89,4.32,4.69)
-#' group <- gl(2, 10, 20, labels = c("Ctl","Trt"))
+#' ctl <- c(4.17, 5.58, 5.18, 6.11, 4.50, 4.61, 5.17, 4.53, 5.33, 5.14)
+#' trt <- c(4.81, 4.17, 4.41, 3.59, 5.87, 3.83, 6.03, 4.89, 4.32, 4.69)
+#' group <- gl(2, 10, 20, labels = c("Ctl", "Trt"))
 #' weight <- c(ctl, trt)
 #' lm_D9 <- lm(weight ~ group)
 #' 
@@ -99,7 +127,7 @@ add_stats.default <- function(results, output, identifier = NULL, type = NULL,
     }
   }
   
-  # Add whether the analysis was pregistered or not
+  # Add whether the analysis was preregistered or not
   if (!missing(preregistered)) {
     if (preregistered) {
       analysis$preregistered <- "yes"
@@ -120,4 +148,67 @@ add_stats.default <- function(results, output, identifier = NULL, type = NULL,
   return(results)
 }
 
-#TODO Check for duplicate identifiers
+#' @export
+add_stats.list <- function(results, output, identifier = NULL, type = NULL,
+  preregistered = NULL, notes = NULL) {
+
+  # Create an identifier if it is not specified, else check whether it already
+  # exists
+  if (is.null(identifier)) {
+    if (deparse(substitute(output)) == ".") {
+      identifier <- paste0("M", formatC(length(results) + 1, width = "1",
+        format = "d"))
+    } else {
+      identifier <- deparse(substitute(output))
+    }
+  } else {
+    if (!is.null(names(results))) {
+      if (identifier %in% names(results)) {
+        stop("Identifier already exists.")
+      }
+    }
+  }
+
+  # Simply set analysis to output; we don't need to tidy the results because
+  # they should already be tidy
+  analysis <- output
+  
+  # Add method name and position it as the first element of the list
+  analysis <- append(analysis, list(method = "Generic test"), 0)
+  
+  # TODO: Add checks to see whether the format of the provided list is correct
+
+  # Add type: primary, secondary, or exploratory
+  if (!missing(type)) {
+    if (type == "primary") {
+      analysis$type <- "primary"  
+    } else if (type == "secondary") {
+      analysis$type <- "secondary"  
+    } else if (type == "exploratory") {
+      analysis$type <- "exploratory"  
+    } else {
+      warning(paste("Unknown type; type should be either 'primary',",
+        "'secondary', or 'exploratory'."))
+    }
+  }
+  
+  # Add whether the analysis was preregistered or not
+  if (!missing(preregistered)) {
+    if (preregistered) {
+      analysis$preregistered <- "yes"
+    } else {
+      analysis$preregistered <- "no"
+    }
+  }
+  
+  # Add notes
+  if (!missing(notes)) {
+    analysis$notes <- notes
+  }
+
+  # Add the new analysis to the list
+  results[[identifier]] <- analysis
+
+  # Return the new results list
+  return(results)
+}

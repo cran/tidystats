@@ -11,10 +11,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 
 
-<meta name="date" content="2020-06-15" />
+<meta name="date" content="2020-09-21" />
 
 <title>Introduction to tidystats</title>
 
+<script>// Hide empty <a> tag within highlighted CodeBlock for screen reader accessibility (see https://github.com/jgm/pandoc/issues/6352#issuecomment-626106786) -->
+// v0.0.1
+// Written by JooYoung Seo (jooyoung@psu.edu) and Atsushi Yasumoto on June 1st, 2020.
+
+document.addEventListener('DOMContentLoaded', function() {
+  const codeList = document.getElementsByClassName("sourceCode");
+  for (var i = 0; i < codeList.length; i++) {
+    var linkList = codeList[i].getElementsByTagName('a');
+    for (var j = 0; j < linkList.length; j++) {
+      if (linkList[j].innerHTML === "") {
+        linkList[j].setAttribute('aria-hidden', 'true');
+      }
+    }
+  }
+});
+</script>
 
 
 <style type="text/css">code{white-space: pre;}</style>
@@ -301,20 +317,23 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 
 <h1 class="title toc-ignore">Introduction to tidystats</h1>
-<h4 class="date">2020-06-15</h4>
+<h4 class="date">2020-09-21</h4>
 
 
 
 <div id="why-use-tidystats" class="section level2">
 <h2>Why use tidystats?</h2>
-<p>The <code>tidystats</code> package is designed to address two problems common in scientific research: incomplete and incorrect statistics reporting. The problem of incomplete statistics reporting likely stems from a fundamental trade-off between wanting to be comprehensive on the one hand and providing a clear narrative on the other. The problem of incorrect statistics reporting is likely caused by manually copy-pasting statistical output from the output window into a text editor. <code>tidystats</code> addresses these two problems by enabling researchers to combine their statistical analyses into a single file, from which a subset of the analyses can then be reported using a Microsoft Word add-in. ## How to use tidystats?</p>
-<p><code>tidystats</code> is designed to easily fit in your data analysis workflow. In fact, <code>tidystats</code> can simply be tacked on at the end of a data analysis session, with only one minor requirement. This requirement is that all analyses are stored in a variable. For example, if you run a regression analysis using the <code>lm()</code> function, you store the result of that analysis in a variable: <code>model1 &lt;- lm(extra ~ group, data = sleep)</code>. By storing each analysis in a variable, you can later add each analysis to a list using the <code>add_stats()</code> function from <code>tidystats</code>. Once all the analyses are gathered together, you save the analyses to a .json file using the <code>write_stats()</code> function. This .json file can then be read by a Word add-in to report your analyses in Word, or shared with others and read into R to extra statistics from your analyses.</p>
+<p>The <code>tidystats</code> package is designed to address two problems common in scientific research: incomplete and incorrect statistics reporting. The problem of incomplete statistics reporting likely stems from a fundamental trade-off between wanting to be comprehensive on the one hand and providing a clear narrative on the other. The problem of incorrect statistics reporting is likely caused by manually copy-pasting statistical output from the output window into a text editor. <code>tidystats</code> addresses these two problems by enabling researchers to combine their statistical analyses into a single file, from which a subset of the analyses can then be reported using a Microsoft Word add-in.</p>
+</div>
+<div id="how-to-use-tidystats" class="section level2">
+<h2>How to use tidystats?</h2>
+<p><code>tidystats</code> is designed to easily fit in your data analysis workflow. In fact, <code>tidystats</code> can simply be tacked on at the end of a data analysis session, with only one minor requirement. This requirement is that all analyses are stored in a variable. For example, if you run a regression analysis using the <code>lm()</code> function, you store the result of that analysis in a variable: <code>model1 &lt;- lm(extra ~ group, data = sleep)</code>. By storing each analysis in a variable, you can later add each analysis to a list using the <code>add_stats()</code> function from <code>tidystats</code>. Once all the analyses are gathered together, you save the analyses to a .json file using the <code>write_stats()</code> function. This .json file can then be read by a Word add-in to report your analyses in Word, or shared with others and read into R to extract statistics from your analyses (e.g., for meta-analyses).</p>
 </div>
 <div id="an-example" class="section level2">
 <h2>An example</h2>
 <p>Below follows an example of a few analyses conducted on the <code>quote_source</code> data contained within the <code>tidystats</code> package. The data is from a large-scaled replication of Lorge &amp; Curtiss (1936). More details can be found in the paper of the replication effort (Klein et al., 2014). In short, participants saw the following quote:</p>
 <blockquote>
-<p>“I hold it that a little rebellion, now and then, is a good thing, and as necessary in the political world as storms are in the physical world.”</p>
+<p>“I have sworn to only live free, even if I find bitter the taste of death.”</p>
 </blockquote>
 <p>The quote was attributed to either George Washington, a liked individual, or Osama Bin Laden, a disliked individual. Participants were asked to what extent they agree with the quote, on a 9-point Likert scale ranging from 1 (disagreement) to 9 (agreement).</p>
 <p>We start with a bit of setup.</p>
@@ -372,8 +391,8 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <p>Participants appear to rate the quote a bit more positively when it is attributed to George Washington.</p>
 <p>We can also perform some additional tests. For instance, does it matter if the participant is from the US? And does age matter? To answer these questions, we can perform interaction tests using <code>lm()</code>.</p>
 <p>The interaction with the participant being from the U.S. or not:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>lm1 &lt;-<span class="st"> </span><span class="kw">lm</span>(response <span class="op">~</span><span class="st"> </span>source <span class="op">*</span><span class="st"> </span>us_or_international, <span class="dt">data =</span> data)</span>
-<span id="cb4-2"><a href="#cb4-2"></a><span class="kw">summary</span>(lm1)</span>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>lm_us_or_not &lt;-<span class="st"> </span><span class="kw">lm</span>(response <span class="op">~</span><span class="st"> </span>source <span class="op">*</span><span class="st"> </span>us_or_international, <span class="dt">data =</span> data)</span>
+<span id="cb4-2"><a href="#cb4-2"></a><span class="kw">summary</span>(lm_us_or_not)</span>
 <span id="cb4-3"><a href="#cb4-3"></a><span class="co">#&gt; </span></span>
 <span id="cb4-4"><a href="#cb4-4"></a><span class="co">#&gt; Call:</span></span>
 <span id="cb4-5"><a href="#cb4-5"></a><span class="co">#&gt; lm(formula = response ~ source * us_or_international, data = data)</span></span>
@@ -402,8 +421,8 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <span id="cb4-28"><a href="#cb4-28"></a><span class="co">#&gt; F-statistic: 59.5 on 3 and 6321 DF,  p-value: &lt;2e-16</span></span></code></pre></div>
 <p>The interaction is significant, so it appears to matter whether the participant is from the U.S. or not. In fact, participants from the U.S. show a stronger effect than those from outside the U.S.</p>
 <p>The interaction with the participant’s age:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>lm2 &lt;-<span class="st"> </span><span class="kw">lm</span>(response <span class="op">~</span><span class="st"> </span>source <span class="op">*</span><span class="st"> </span>age, <span class="dt">data =</span> data)</span>
-<span id="cb5-2"><a href="#cb5-2"></a><span class="kw">summary</span>(lm2)</span>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>lm_age &lt;-<span class="st"> </span><span class="kw">lm</span>(response <span class="op">~</span><span class="st"> </span>source <span class="op">*</span><span class="st"> </span>age, <span class="dt">data =</span> data)</span>
+<span id="cb5-2"><a href="#cb5-2"></a><span class="kw">summary</span>(lm_age)</span>
 <span id="cb5-3"><a href="#cb5-3"></a><span class="co">#&gt; </span></span>
 <span id="cb5-4"><a href="#cb5-4"></a><span class="co">#&gt; Call:</span></span>
 <span id="cb5-5"><a href="#cb5-5"></a><span class="co">#&gt; lm(formula = response ~ source * age, data = data)</span></span>
@@ -426,7 +445,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <span id="cb5-22"><a href="#cb5-22"></a><span class="co">#&gt; Multiple R-squared:  0.0308, Adjusted R-squared:  0.0304 </span></span>
 <span id="cb5-23"><a href="#cb5-23"></a><span class="co">#&gt; F-statistic: 66.9 on 3 and 6308 DF,  p-value: &lt;2e-16</span></span></code></pre></div>
 <p>No significant interaction effect, so we do not have evidence for age changing the size of the effect.</p>
-<p>Let’s say these are the analyses we want to save the output of and report later. This is where <code>tidystats</code> comes in. The steps to perform are to first create an empty list and then to use the <code>add_stats()</code> function to add analyses to the list. This is why we stored each analysis into a variable. The <code>add_stats()</code> function takes an analysis so that it can be added to list. Optionally, you can add additional information about each analysis, such as whether it was preregistered, whether it was a primary, secondary, or exploratory analysis, or simply add some notes.</p>
+<p>Let’s say these are the analyses we want to save the output of and report later. This is where <code>tidystats</code> comes in. The steps to perform are to first create an empty list and then to use the <code>add_stats()</code> function to add analyses to the list. This is why we stored each analysis into a variable. The <code>add_stats()</code> function takes an analysis, extracts the statistics, and adds the result to a list. Optionally, you can add additional information about each analysis, such as whether it was preregistered, whether it was a primary, secondary, or exploratory analysis, or simply add some notes.</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a><span class="co"># Create an empty list to store the analyses in</span></span>
 <span id="cb6-2"><a href="#cb6-2"></a>results &lt;-<span class="st"> </span><span class="kw">list</span>()</span>
 <span id="cb6-3"><a href="#cb6-3"></a></span>
@@ -434,10 +453,10 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <span id="cb6-5"><a href="#cb6-5"></a>results &lt;-<span class="st"> </span>results <span class="op">%&gt;%</span></span>
 <span id="cb6-6"><a href="#cb6-6"></a><span class="st">  </span><span class="kw">add_stats</span>(t_test, <span class="dt">preregistered =</span> <span class="ot">TRUE</span>, <span class="dt">type =</span> <span class="st">&quot;primary&quot;</span>, </span>
 <span id="cb6-7"><a href="#cb6-7"></a>    <span class="dt">notes =</span> <span class="st">&quot;A t-test comparing the effect of source on the quote rating.&quot;</span>) <span class="op">%&gt;%</span></span>
-<span id="cb6-8"><a href="#cb6-8"></a><span class="st">  </span><span class="kw">add_stats</span>(lm1, <span class="dt">preregistered =</span> <span class="ot">FALSE</span>, <span class="dt">type =</span> <span class="st">&quot;exploratory&quot;</span>, </span>
+<span id="cb6-8"><a href="#cb6-8"></a><span class="st">  </span><span class="kw">add_stats</span>(lm_us_or_not, <span class="dt">preregistered =</span> <span class="ot">FALSE</span>, <span class="dt">type =</span> <span class="st">&quot;exploratory&quot;</span>, </span>
 <span id="cb6-9"><a href="#cb6-9"></a>    <span class="dt">notes =</span> <span class="st">&quot;Interaction effect with being from the U.S. or not.&quot;</span>) <span class="op">%&gt;%</span></span>
-<span id="cb6-10"><a href="#cb6-10"></a><span class="st">  </span><span class="kw">add_stats</span>(lm2)</span></code></pre></div>
-<p>You can see that I added quite some information each the first and second analysis. This is recommended because it is easy to forget which analysis is which; and you might accidentally report the wrong analysis if you have many of them. It’s also nice to add some documentation so that others who are not as familiar with your data can also better understand each analysis.</p>
+<span id="cb6-10"><a href="#cb6-10"></a><span class="st">  </span><span class="kw">add_stats</span>(lm_age)</span></code></pre></div>
+<p>You can see that I added quite some information to the first and second analysis. This is recommended because it is easy to forget which analysis is which; and you might accidentally report the wrong analysis if you have many of them. It’s also nice to add some documentation so that others who are not as familiar with your data can also better understand each analysis.</p>
 <p>To save these analyses to a file, you can use the <code>write_stats()</code> function.</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="kw">write_stats</span>(results, <span class="st">&quot;lorge-curtiss-1936-replication.json&quot;</span>)</span></code></pre></div>
 <p>Note the file extension: .json. These types of files are simply text files, but in a format that is machine-readable (unfortunately, not very human-readable). This file can be used to share with others so that they can read it back into R and extract statistics (e.g., for meta-analyses) or by you to report the statistics in Word.</p>

@@ -11,10 +11,26 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 
 
-<meta name="date" content="2020-06-15" />
+<meta name="date" content="2020-09-21" />
 
 <title>Read and use a tidystats file</title>
 
+<script>// Hide empty <a> tag within highlighted CodeBlock for screen reader accessibility (see https://github.com/jgm/pandoc/issues/6352#issuecomment-626106786) -->
+// v0.0.1
+// Written by JooYoung Seo (jooyoung@psu.edu) and Atsushi Yasumoto on June 1st, 2020.
+
+document.addEventListener('DOMContentLoaded', function() {
+  const codeList = document.getElementsByClassName("sourceCode");
+  for (var i = 0; i < codeList.length; i++) {
+    var linkList = codeList[i].getElementsByTagName('a');
+    for (var j = 0; j < linkList.length; j++) {
+      if (linkList[j].innerHTML === "") {
+        linkList[j].setAttribute('aria-hidden', 'true');
+      }
+    }
+  }
+});
+</script>
 
 
 <style type="text/css">code{white-space: pre;}</style>
@@ -301,11 +317,11 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 
 <h1 class="title toc-ignore">Read and use a tidystats file</h1>
-<h4 class="date">2020-06-15</h4>
+<h4 class="date">2020-09-21</h4>
 
 
 
-<p>An additional usage of the tidystats-produced file is that it can be read back into R and converted into a data frame. This enables researchers to then extract specific statistics to perform additional analyses with (e.g., meta-analyses). Below is an example.</p>
+<p>Besides using <code>tidystats</code> in combination with Microsoft Word to report statistics, you can also use <code>tidystats</code> to convert a list of statistics into a data frame. This enables researchers to then easily extract specific statistics to perform additional analyses with (e.g., meta-analyses). Below is an example of how to convert a list of statistics to a data frame and several simple operations.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="co"># Load packages</span></span>
 <span id="cb1-2"><a href="#cb1-2"></a><span class="kw">library</span>(tidystats)</span>
 <span id="cb1-3"><a href="#cb1-3"></a><span class="kw">library</span>(dplyr)</span>
@@ -323,11 +339,10 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <thead>
 <tr class="header">
 <th align="left">identifier</th>
-<th align="left">method</th>
-<th align="left">group</th>
 <th align="left">term</th>
 <th align="left">statistic</th>
 <th align="right">value</th>
+<th align="left">method</th>
 <th align="left">type</th>
 <th align="left">preregistered</th>
 </tr>
@@ -335,116 +350,169 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <tbody>
 <tr class="odd">
 <td align="left">sleep_test</td>
-<td align="left">Paired t-test</td>
-<td align="left"></td>
 <td align="left"></td>
 <td align="left">p</td>
 <td align="right">0.003</td>
+<td align="left">Paired t-test</td>
 <td align="left">primary</td>
 <td align="left"></td>
 </tr>
 <tr class="even">
 <td align="left">lm_D9</td>
+<td align="left"></td>
+<td align="left">p</td>
+<td align="right">0.249</td>
 <td align="left">Linear regression</td>
-<td align="left">coefficients</td>
+<td align="left"></td>
+<td align="left">no</td>
+</tr>
+<tr class="odd">
+<td align="left">lm_D9</td>
 <td align="left">(Intercept)</td>
 <td align="left">p</td>
 <td align="right">0.000</td>
+<td align="left">Linear regression</td>
 <td align="left"></td>
 <td align="left">no</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td align="left">lm_D9</td>
-<td align="left">Linear regression</td>
-<td align="left">coefficients</td>
 <td align="left">groupTrt</td>
 <td align="left">p</td>
 <td align="right">0.249</td>
-<td align="left"></td>
-<td align="left">no</td>
-</tr>
-<tr class="even">
-<td align="left">lm_D9</td>
 <td align="left">Linear regression</td>
-<td align="left">model</td>
-<td align="left"></td>
-<td align="left">p</td>
-<td align="right">0.249</td>
 <td align="left"></td>
 <td align="left">no</td>
 </tr>
 <tr class="odd">
 <td align="left">npk_aov</td>
-<td align="left">ANOVA</td>
-<td align="left"></td>
 <td align="left">block</td>
 <td align="left">p</td>
 <td align="right">0.016</td>
+<td align="left">ANOVA</td>
 <td align="left"></td>
 <td align="left"></td>
 </tr>
 <tr class="even">
 <td align="left">npk_aov</td>
-<td align="left">ANOVA</td>
-<td align="left"></td>
 <td align="left">N</td>
 <td align="left">p</td>
 <td align="right">0.004</td>
+<td align="left">ANOVA</td>
 <td align="left"></td>
 <td align="left"></td>
 </tr>
 <tr class="odd">
 <td align="left">npk_aov</td>
-<td align="left">ANOVA</td>
-<td align="left"></td>
 <td align="left">P</td>
 <td align="left">p</td>
 <td align="right">0.475</td>
+<td align="left">ANOVA</td>
 <td align="left"></td>
 <td align="left"></td>
 </tr>
 <tr class="even">
 <td align="left">npk_aov</td>
-<td align="left">ANOVA</td>
-<td align="left"></td>
 <td align="left">K</td>
 <td align="left">p</td>
 <td align="right">0.029</td>
+<td align="left">ANOVA</td>
 <td align="left"></td>
 <td align="left"></td>
 </tr>
 <tr class="odd">
 <td align="left">npk_aov</td>
-<td align="left">ANOVA</td>
-<td align="left"></td>
 <td align="left">N:P</td>
 <td align="left">p</td>
 <td align="right">0.263</td>
+<td align="left">ANOVA</td>
 <td align="left"></td>
 <td align="left"></td>
 </tr>
 <tr class="even">
 <td align="left">npk_aov</td>
-<td align="left">ANOVA</td>
-<td align="left"></td>
 <td align="left">N:K</td>
 <td align="left">p</td>
 <td align="right">0.169</td>
+<td align="left">ANOVA</td>
 <td align="left"></td>
 <td align="left"></td>
 </tr>
 <tr class="odd">
 <td align="left">npk_aov</td>
-<td align="left">ANOVA</td>
-<td align="left"></td>
 <td align="left">P:K</td>
 <td align="left">p</td>
 <td align="right">0.863</td>
+<td align="left">ANOVA</td>
 <td align="left"></td>
 <td align="left"></td>
 </tr>
 </tbody>
 </table>
+<p>Alternatively, you can select all the significant p-values:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a>sig_p_values &lt;-<span class="st"> </span><span class="kw">filter</span>(results_df, statistic <span class="op">==</span><span class="st"> &quot;p&quot;</span> <span class="op">&amp;</span><span class="st"> </span>value <span class="op">&lt;</span><span class="st"> </span><span class="fl">.05</span>)</span></code></pre></div>
+<table>
+<thead>
+<tr class="header">
+<th align="left">identifier</th>
+<th align="left">term</th>
+<th align="left">statistic</th>
+<th align="right">value</th>
+<th align="left">method</th>
+<th align="left">type</th>
+<th align="left">preregistered</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">sleep_test</td>
+<td align="left"></td>
+<td align="left">p</td>
+<td align="right">0.003</td>
+<td align="left">Paired t-test</td>
+<td align="left">primary</td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">lm_D9</td>
+<td align="left">(Intercept)</td>
+<td align="left">p</td>
+<td align="right">0.000</td>
+<td align="left">Linear regression</td>
+<td align="left"></td>
+<td align="left">no</td>
+</tr>
+<tr class="odd">
+<td align="left">npk_aov</td>
+<td align="left">block</td>
+<td align="left">p</td>
+<td align="right">0.016</td>
+<td align="left">ANOVA</td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr class="even">
+<td align="left">npk_aov</td>
+<td align="left">N</td>
+<td align="left">p</td>
+<td align="right">0.004</td>
+<td align="left">ANOVA</td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+<tr class="odd">
+<td align="left">npk_aov</td>
+<td align="left">K</td>
+<td align="left">p</td>
+<td align="right">0.029</td>
+<td align="left">ANOVA</td>
+<td align="left"></td>
+<td align="left"></td>
+</tr>
+</tbody>
+</table>
+<p>This could be useful if you want to conduct a <a href="https://journals.sagepub.com/doi/abs/10.1177/1745691614553988">p-curve analysis</a>. Although do note that you should not blindly select all <em>p</em>-values. You should select only the <em>p</em>-values that are relevant to a particular hypothesis. If researchers provide the correct meta-information for each test (e.g., by indicating whether it is a primary analysis), this could help meta-researchers make correct decisions about which statistics to include in their analyses.</p>
+<p>In short, by reading a <code>tidystats</code>-produced file of statistics, you can convert the statistics to a data frame using the <code>tidy_stats_to_data_frame</code> function and apply common data transformation functions to extract specific statistics.</p>
 
 
 
