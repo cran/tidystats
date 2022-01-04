@@ -747,7 +747,7 @@ tidy_stats.tidystats_descriptives <- function(x) {
   output$method <- "Descriptives"
   
   # Extract variable information
-  var_name <- dplyr::first(dplyr::pull(x, variable))
+  var_name <- dplyr::first(dplyr::pull(x, var))
   
   # Extract grouping information
   group_names <- dplyr::group_vars(x)
@@ -848,39 +848,52 @@ tidy_stats.tidystats_counts <- function(x) {
   
   # Extract grouping variables
   group_names <- names(x)[!names(x) %in% c("n", "pct")]
-  output$name <- paste(group_names, collapse = " - ")
   
-  # Combine grouping variables into a single column
-  x <- tidyr::unite(x, col = "group", dplyr::all_of(group_names), sep = " - ")
-  
-  # Create an empty groups list
-  groups <- list()
-  
-  # Loop over each row in the data frame and extract the statistics
-  for (i in 1:nrow(x)) {
-    # Create an empty group list
-    group <- list()
+  # Check if there are any groups, if so, combine the grouping variables into
+  # a single column and loop over each group to extract the statistics
+  if (length(group_names) != 0) {
+    output$name <- paste(group_names, collapse = " - ")
     
-    # Select the current row
-    row <- x[i, ]
+    x <- tidyr::unite(x, col = "group", dplyr::all_of(group_names), sep = " - ")
     
-    # Set the group name
-    group$name <- row$group
+    # Create an empty groups list
+    groups <- list()
+    
+    # Loop over each row in the data frame and extract the statistics
+    for (i in 1:nrow(x)) {
+      # Create an empty group list
+      group <- list()
       
+      # Select the current row
+      row <- x[i, ]
+      
+      # Set the group name
+      group$name <- row$group
+        
+      # Extract statistics
+      statistics <- list()
+      
+      if ("n" %in% names(row)) statistics$n <- row$n
+      if ("pct" %in% names(row)) statistics$pct <- row$pct
+      
+      # Add the statistics to the variable's statistics property
+      group$statistics <- statistics    
+        
+      # Add the group to the groups list
+      groups[[i]] <- group
+      
+      # Add the groups list to the variable list
+      output$groups <- groups
+    }
+  } else {
     # Extract statistics
     statistics <- list()
     
-    if ("n" %in% names(row)) statistics$n <- row$n
-    if ("pct" %in% names(row)) statistics$pct <- row$pct
+    if ("n" %in% names(x)) statistics$n <- x$n
+    if ("pct" %in% names(x)) statistics$pct <- x$pct
     
     # Add the statistics to the variable's statistics property
-    group$statistics <- statistics    
-      
-    # Add the group to the groups list
-    groups[[i]] <- group
-    
-    # Add the groups list to the variable list
-    output$groups <- groups
+    output$statistics <- statistics 
   }
   
   # Add package information
@@ -1431,44 +1444,43 @@ tidy_stats.afex_aov <- function(x) {
   # Set the DV
   output$DV <- attr(x, "dv")
   
-  # Create an empty coefficients list
-  coefficients <- list()
+  # Create an empty terms list
+  terms <- list()
   
   # Convert the results to a data frame
-  effects <- tibble::as_tibble(x$anova_table, rownames = "effect")
+  df <- tibble::as_tibble(x$anova_table, rownames = "effect")
   
-  for (i in 1:nrow(effects)) {
+  for (i in 1:nrow(df)) {
     
-    # Create a new coefficient list
-    coefficient <- list()
+    # Create a new term list
+    term <- list()
     
-    # Add the name of the coefficient
-    name <- effects$effect[i]
-    coefficient$name <- name
+    # Add the name of the term
+    term$name <- df$effect[i]
     
     # Create a new statistics list and add the coefficient's statistics
     statistics <- list()
     
-    statistics$dfs <- list(
-      df_numerator = effects$`num Df`[i], 
-      df_denominator = effects$`den Df`[i]
-    )
-    statistics$MS <- effects$MSE[i]
+    statistics$MS <- df$MSE[i]
     statistics$statistic <- list(
       name = "F", 
-      value = effects$`F`[i]
+      value = df$`F`[i]
     )
-    statistics$p <- effects$`Pr(>F)`[i]
-    statistics$ges <- effects$ges[i]
+    statistics$dfs <- list(
+      df_numerator = df$`num Df`[i], 
+      df_denominator = df$`den Df`[i]
+    )
+    statistics$p <- df$`Pr(>F)`[i]
+    statistics$ges <- df$ges[i]
     
-    coefficient$statistics <- statistics
+    term$statistics <- statistics
     
-    # Add the coefficient data to the coefficients list
-    coefficients[[i]] <- coefficient
+    # Add the term data to the terms list
+    terms[[i]] <- term
   }
   
-  # Add coefficients to the output
-  output$coefficients <- coefficients
+  # Add terms to the output
+  output$terms <- terms
   
   # Add additional information
   output$type <- attr(x, "type")
@@ -1484,4 +1496,157 @@ tidy_stats.afex_aov <- function(x) {
   output$package <- package
   
   return(output)
+}
+
+
+#' @describeIn tidy_stats tidy_stats method for class 'emmGrid'
+#' @export
+tidy_stats.emmGrid <- function(x) {
+  
+  output <- list()
+
+  # Convert object to a data frame
+  df <- as.data.frame(x)
+  
+  # Set method
+  type <- x@misc$estType
+  
+  if (type == "contrast" | type == "pairs") {
+    output$method <- "contrast"  
+  } else {
+    output$method <- "EMM"
+  }
+  
+  # Determine type of analysis
+  by <- x@misc$by.vars
+  
+  if (!is.null(by)) {
+    
+    # Create an empty groups list
+    groups <- list()
+  
+    for (i in 1:length(levels(df[, by]))) {
+      # Create an empty group
+      group <- list()
+      
+      # Set the group name
+      name <- levels(df[, by])[i]
+      group$name <- paste(by, "=", name)
+      
+      # Create an empty terms list
+      terms <- list()
+      
+      # Filter the statistics of this group
+      df_group <- df[df[by] == name, ]
+      
+      for (j in 1:nrow(df_group)) {
+      
+        # Create a new term list
+        term <- list()
+        
+        # Add the name of the term
+        if (type == "contrast") {
+          term$name <- df_group$contrast[j]
+        } else if (type == "prediction") {
+          term$name <- paste(x@misc$pri.vars, "=", df_group[, x@misc$pri.vars][j])
+        } else {
+          term$name <- df_group$terms[j]  
+        }
+        
+        # Create a new statistics list and add the term's statistics
+        statistics <- list()
+        
+        if (type == "contrast") {
+          statistics$estimate$name <- "mean difference"
+          statistics$estimate$value <- df_group$estimate[j]
+          statistics$SE <- df_group$SE[j]
+          statistics$df <- df_group$df[j]
+          statistics$statistic$name <- "t"
+          statistics$statistic$value <- df_group$t.ratio[j]
+          statistics$p <- df_group$p.value[j]
+        } else {
+          statistics$EMM <- df_group$emmean[j]
+          statistics$SE <- df_group$SE[j]
+          statistics$df <- df_group$df[j]
+          statistics$CI$CI_level <- x@misc$level
+          statistics$CI$CI_lower <- df_group$lower.CL[j]
+          statistics$CI$CI_upper <- df_group$upper.CL[j]
+        }
+        
+        term$statistics <- statistics
+      
+        # Add the term data to the coefficients list
+        terms[[j]] <- term
+      }
+      
+      # Add coefficients to the group
+      group$terms <- terms
+      
+      # Add group to the groups list
+      groups[[i]] <- group
+    }
+    
+    # Add groups to the output
+    output$groups <- groups
+  } else {
+    # Create an empty terms list
+    terms <- list()
+    
+    for (i in 1:nrow(df)) {
+  
+      # Create a new term list
+      term <- list()
+      
+      # Add the name of the term
+      term$name <- df$contrast[i]
+      
+      # Create a new statistics list and add the term's statistics
+      statistics <- list()
+      
+      statistics$estimate$name <- "b"
+      statistics$estimate$value <- df$estimate[i]
+      statistics$SE <- df$SE[i]
+      statistics$df <- df$df[i]
+      statistics$statistic$name <- "t"
+      statistics$statistic$value <- df$t.ratio[i]
+      statistics$p <- df$p.value[i]
+      
+      term$statistics <- statistics
+    
+      # Add the term data to the coefficients list
+      terms[[i]] <- term
+    }
+    
+    # Add terms to the output
+    output$terms <- terms
+  }
+  
+  # Add additional information
+  if (!is.null(x@misc$avgd.over)) {
+    output$averaged_over <- paste(x@misc$avgd.over, collapse = "; ")  
+  }
+  if (!is.null(x@misc$adjust)) {
+    output$adjust <- x@misc$adjust  
+  }
+  if (!is.null(x@misc$famSize  )) {
+    output$family_size <- x@misc$famSize  
+  }
+  
+  # Add package information
+  package <- list()
+
+  package$name <- "emmeans"
+  package$version <- getNamespaceVersion("emmeans")[[1]]
+
+  # Add package information to output
+  output$package <- package
+  
+  return(output)
+}
+
+#' @describeIn tidy_stats tidy_stats method for class 'emm_list'
+#' @export
+tidy_stats.emm_list <- function(x) {
+  stop(paste("You're trying to tidy an object of class 'emm_list'; ", 
+    "please provide an object with class 'emmGrid'."))
 }
