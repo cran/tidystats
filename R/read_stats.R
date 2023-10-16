@@ -1,25 +1,41 @@
-#' Read a .json file that was produced with \code{write_stats}
+#' Read a .json file that was produced with [write_stats()]
 #'
-#' \code{read_stats} can read in a .json file containing the statistical output
-#' that was produced with \code{write_stats}. It returns a list containing the 
-#' results, with the identifier as the name for each list element.
+#' [read_stats()] can read a .json file containing statistics that was produced
+#' using tidystats. It returns a list containing the statistics, with the
+#' identifier as the name for each list element.
 #'
-#' @param file Path to the tidy stats data file
+#' @param file A string specifying the path to the tidystats data file.
 #'
 #' @examples
-#' results <- read_stats(system.file("results.json", package = "tidystats"))
+#' # A simple example, assuming there is a file called 'statistics.json'
+#' \dontrun{
+#' statistics <- read_stats("statistics.json")
+#' }
+#'
+#' # A working example
+#' statistics <- read_stats(
+#'   file = system.file("statistics.json", package = "tidystats")
+#' )
 #'
 #' @export
 read_stats <- function(file) {
+  if (tools::file_ext(file) != "json") {
+    warning(
+      paste(
+        "The file does not have a .json file extension;",
+        "make sure you have specified the correct file."
+      )
+    )
+  }
 
-  # Read a tidystats-produced .json file
   results <- jsonlite::read_json(file)
-  
-  #TODO: Add checks to see whether the file has the correct structure
 
   # Look for character Inf's and convert them to numeric
-  results <- rapply(results, function(x) if(x == "Inf") Inf else x, 
-    how = "replace")
-  
+  results <- rapply(
+    results,
+    function(x) ifelse(x %in% c("Inf", "-Inf"), as.numeric(x), x),
+    how = "replace"
+  )
+
   return(results)
 }

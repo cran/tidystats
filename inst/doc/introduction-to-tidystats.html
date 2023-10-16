@@ -11,7 +11,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 
 
-<meta name="date" content="2023-04-13" />
+<meta name="date" content="2023-10-17" />
 
 <title>Introduction to tidystats</title>
 
@@ -338,49 +338,49 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 
 <h1 class="title toc-ignore">Introduction to tidystats</h1>
-<h4 class="date">2023-04-13</h4>
+<h4 class="date">2023-10-17</h4>
 
 
 
 <div id="why-use-tidystats" class="section level2">
 <h2>Why use tidystats?</h2>
-<p>The <code>tidystats</code> package is designed to address two
-problems common in scientific research: incomplete and incorrect
-statistics reporting. The problem of incomplete statistics reporting
-likely stems from a fundamental trade-off between wanting to be
-comprehensive on the one hand and providing a clear narrative on the
-other. The problem of incorrect statistics reporting is likely caused by
-manually copy-pasting statistical output from the output window into a
-text editor. <code>tidystats</code> addresses these two problems by
-enabling researchers to combine their statistical analyses into a single
-file, from which a subset of the analyses can then be reported using a
-Microsoft Word add-in.</p>
+<p>The tidystats package is designed to address two problems common in
+scientific research: incomplete and incorrect statistics reporting. The
+problem of incomplete statistics reporting likely stems from a
+fundamental trade-off between comprehensively reporting all statistics
+on the one hand and providing a clear, easy-to-read, text on the other.
+Word limits don’t help either. The problem of incorrect statistics
+reporting is likely caused by manually copy-pasting statistical output
+from the output window into a text editor. tidystats addresses these two
+problems by enabling researchers to combine the statistics from their
+statistical analyses into a single file, which can be shared with others
+and used to report statistics using a text editor add-in.</p>
 </div>
 <div id="how-to-use-tidystats" class="section level2">
 <h2>How to use tidystats?</h2>
-<p><code>tidystats</code> is designed to easily fit in your data
-analysis workflow. In fact, <code>tidystats</code> can simply be tacked
-on at the end of a data analysis session, with only one minor
-requirement. This requirement is that all analyses are stored in a
-variable. For example, if you run a regression analysis using the
-<code>lm()</code> function, you store the result of that analysis in a
-variable: <code>model1 &lt;- lm(extra ~ group, data = sleep)</code>. By
-storing each analysis in a variable, you can later add each analysis to
-a list using the <code>add_stats()</code> function from
-<code>tidystats</code>. Once all the analyses are gathered together, you
-save the analyses to a .json file using the <code>write_stats()</code>
-function. This .json file can then be read by a Word add-in to report
-your analyses in Word, or shared with others and read into R to extract
-statistics from your analyses (e.g., for meta-analyses).</p>
+<p>tidystats is designed to easily fit in your data analysis workflow.
+In fact, tidystats can simply be tacked on at the end of a data analysis
+session, assuming you have stored the results from each statistical
+function into a variable. For example, when you create a regression
+model using the <code>lm()</code> function, you often store the result
+of that analysis in a variable:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>model <span class="ot">&lt;-</span> <span class="fu">lm</span>(extra <span class="sc">~</span> group, <span class="at">data =</span> sleep)</span></code></pre></div>
+<p>By storing the output of statistical functions in a variable, you can
+use the <code>add_stats()</code> function from tidystats to extract the
+statistics and add them to a list. Once all the statistics are gathered
+together, you save them to a .json file using the
+<code>write_stats()</code> function. This .json file can then be read by
+a text editor add-in to report the statistics, or shared with others and
+read into R to extract statistics (e.g., for meta-analyses).</p>
 </div>
 <div id="an-example" class="section level2">
 <h2>An example</h2>
-<p>Below follows an example of a few analyses conducted on the
-<code>quote_source</code> data contained within the
-<code>tidystats</code> package. The data is from a large-scaled
-replication of Lorge &amp; Curtiss (1936). More details can be found in
-the paper of the replication effort (Klein et al., 2014). In short,
-participants saw the following quote:</p>
+<p>Below follows an example of several analyses conducted on the
+<code>quote_source</code> data contained within the tidystats package.
+The data is from a large-scaled replication of Lorge &amp; Curtiss
+(1936). More details can be found in the paper of the replication effort
+(Klein et al., 2014). In short, participants saw the following
+quote:</p>
 <blockquote>
 <p>“I have sworn to only live free, even if I find bitter the taste of
 death.”</p>
@@ -390,158 +390,130 @@ individual, or Osama Bin Laden, a disliked individual. Participants were
 asked to what extent they agree with the quote, on a 9-point Likert
 scale ranging from 1 (disagreement) to 9 (agreement).</p>
 <p>We start with a bit of setup.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load packages</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidystats)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Load data</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> tidystats<span class="sc">::</span>quote_source</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="fu">library</span>(tidystats)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>data <span class="ot">&lt;-</span> quote_source</span></code></pre></div>
 <p>The main hypothesis is that people will like the quote more when it
 is attributed to George Washington compared to Osama Bin Laden. We test
-this hypothesis by first looking at the descriptives and then by
-conducting a <em>t</em>-test.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>descriptives <span class="ot">&lt;-</span> data <span class="sc">%&gt;%</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(source) <span class="sc">%&gt;%</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">describe_data</span>(response, <span class="at">short =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>descriptives</span></code></pre></div>
-<table>
-<thead>
-<tr class="header">
-<th align="left">var</th>
-<th align="left">source</th>
-<th align="right">N</th>
-<th align="right">M</th>
-<th align="right">SD</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">response</td>
-<td align="left">Bin Laden</td>
-<td align="right">3083</td>
-<td align="right">5.23</td>
-<td align="right">2.11</td>
-</tr>
-<tr class="even">
-<td align="left">response</td>
-<td align="left">Washington</td>
-<td align="right">3242</td>
-<td align="right">5.93</td>
-<td align="right">2.21</td>
-</tr>
-</tbody>
-</table>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>t_test <span class="ot">&lt;-</span> <span class="fu">t.test</span>(response <span class="sc">~</span> source, <span class="at">data =</span> data)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>t_test</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  Welch Two Sample t-test</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; data:  response by source</span></span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; t = -13, df = 6323, p-value &lt;2e-16</span></span>
-<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; alternative hypothesis: true difference in means between group Bin Laden and group Washington is not equal to 0</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; 95 percent confidence interval:</span></span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  -0.802 -0.589</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; sample estimates:</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;  mean in group Bin Laden mean in group Washington </span></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                     5.23                     5.93</span></span></code></pre></div>
+this hypothesis by conducting a <em>t</em>-test.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>t_test <span class="ot">&lt;-</span> <span class="fu">t.test</span>(response <span class="sc">~</span> source, <span class="at">data =</span> data)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>t_test</span></code></pre></div>
+<pre><code>## 
+##  Welch Two Sample t-test
+## 
+## data:  response by source
+## t = -12.801, df = 6322.7, p-value &lt; 2.2e-16
+## alternative hypothesis: true difference in means between group Bin Laden and group Washington is not equal to 0
+## 95 percent confidence interval:
+##  -0.8017441 -0.5888010
+## sample estimates:
+##  mean in group Bin Laden mean in group Washington 
+##                 5.232241                 5.927514</code></pre>
 <p>Participants appear to rate the quote a bit more positively when it
 is attributed to George Washington.</p>
 <p>We can also perform some additional tests. For instance, does it
 matter if the participant is from the US? And does age matter? To answer
 these questions, we can perform interaction tests using
 <code>lm()</code>.</p>
-<p>The interaction with the participant being from the U.S. or not:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>lm_us_or_not <span class="ot">&lt;-</span> <span class="fu">lm</span>(response <span class="sc">~</span> source <span class="sc">*</span> us_or_international, <span class="at">data =</span> data)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(lm_us_or_not)</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; lm(formula = response ~ source * us_or_international, data = data)</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Residuals:</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Min     1Q Median     3Q    Max </span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; -5.005 -1.228 -0.228  1.772  3.772 </span></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                                   Estimate Std. Error t value</span></span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (Intercept)                                         5.2278     0.0437  119.50</span></span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; sourceWashington                                    0.7769     0.0613   12.67</span></span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; us_or_internationalinternational                    0.0210     0.0955    0.22</span></span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; sourceWashington:us_or_internationalinternational  -0.3717     0.1323   -2.81</span></span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                                                   Pr(&gt;|t|)    </span></span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (Intercept)                                         &lt;2e-16 ***</span></span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; sourceWashington                                    &lt;2e-16 ***</span></span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; us_or_internationalinternational                     0.826    </span></span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; sourceWashington:us_or_internationalinternational    0.005 ** </span></span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---</span></span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</span></span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Residual standard error: 2.16 on 6321 degrees of freedom</span></span>
-<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   (18 observations deleted due to missingness)</span></span>
-<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared:  0.0275, Adjusted R-squared:  0.027 </span></span>
-<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F-statistic: 59.5 on 3 and 6321 DF,  p-value: &lt;2e-16</span></span></code></pre></div>
+<p>Let’s start with the interaction between the source and whether the
+participant is from the U.S. or not.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>lm_us_or_not <span class="ot">&lt;-</span> <span class="fu">lm</span>(response <span class="sc">~</span> source <span class="sc">*</span> us_or_international, <span class="at">data =</span> data)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">summary</span>(lm_us_or_not)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = response ~ source * us_or_international, data = data)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -5.0047 -1.2278 -0.2278  1.7722  3.7722 
+## 
+## Coefficients:
+##                                                   Estimate Std. Error t value
+## (Intercept)                                        5.22783    0.04375  119.50
+## sourceWashington                                   0.77691    0.06130   12.67
+## us_or_internationalinternational                   0.02101    0.09550    0.22
+## sourceWashington:us_or_internationalinternational -0.37169    0.13227   -2.81
+##                                                   Pr(&gt;|t|)    
+## (Intercept)                                        &lt; 2e-16 ***
+## sourceWashington                                   &lt; 2e-16 ***
+## us_or_internationalinternational                   0.82589    
+## sourceWashington:us_or_internationalinternational  0.00497 ** 
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 2.159 on 6321 degrees of freedom
+##   (18 observations deleted due to missingness)
+## Multiple R-squared:  0.02748,    Adjusted R-squared:  0.02701 
+## F-statistic: 59.53 on 3 and 6321 DF,  p-value: &lt; 2.2e-16</code></pre>
 <p>The interaction is significant, so it appears to matter whether the
 participant is from the U.S. or not. In fact, participants from the U.S.
 show a stronger effect than those from outside the U.S.</p>
-<p>The interaction with the participant’s age:</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>lm_age <span class="ot">&lt;-</span> <span class="fu">lm</span>(response <span class="sc">~</span> source <span class="sc">*</span> age, <span class="at">data =</span> data)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(lm_age)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Call:</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; lm(formula = response ~ source * age, data = data)</span></span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Residuals:</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;    Min     1Q Median     3Q    Max </span></span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; -5.743 -1.202 -0.152  1.793  3.883 </span></span>
-<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Coefficients:</span></span>
-<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;                      Estimate Std. Error t value Pr(&gt;|t|)    </span></span>
-<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; (Intercept)           4.93370    0.09589   51.45  &lt; 2e-16 ***</span></span>
-<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; sourceWashington      0.55737    0.13558    4.11    4e-05 ***</span></span>
-<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; age                   0.01147    0.00336    3.41  0.00065 ***</span></span>
-<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; sourceWashington:age  0.00545    0.00478    1.14  0.25433    </span></span>
-<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; ---</span></span>
-<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</span></span>
-<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; </span></span>
-<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Residual standard error: 2.16 on 6308 degrees of freedom</span></span>
-<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt;   (31 observations deleted due to missingness)</span></span>
-<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; Multiple R-squared:  0.0308, Adjusted R-squared:  0.0304 </span></span>
-<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; F-statistic: 66.9 on 3 and 6308 DF,  p-value: &lt;2e-16</span></span></code></pre></div>
+<p>What about the interaction between source and the participant’s
+age?</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>lm_age <span class="ot">&lt;-</span> <span class="fu">lm</span>(response <span class="sc">~</span> source <span class="sc">*</span> age, <span class="at">data =</span> data)</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="fu">summary</span>(lm_age)</span></code></pre></div>
+<pre><code>## 
+## Call:
+## lm(formula = response ~ source * age, data = data)
+## 
+## Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -5.7433 -1.2018 -0.1516  1.7928  3.8828 
+## 
+## Coefficients:
+##                      Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept)          4.933702   0.095891  51.451  &lt; 2e-16 ***
+## sourceWashington     0.557365   0.135579   4.111 3.99e-05 ***
+## age                  0.011470   0.003361   3.412 0.000648 ***
+## sourceWashington:age 0.005453   0.004783   1.140 0.254328    
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1
+## 
+## Residual standard error: 2.156 on 6308 degrees of freedom
+##   (31 observations deleted due to missingness)
+## Multiple R-squared:  0.03085,    Adjusted R-squared:  0.03038 
+## F-statistic: 66.92 on 3 and 6308 DF,  p-value: &lt; 2.2e-16</code></pre>
 <p>No significant interaction effect, so we do not have evidence for age
 changing the size of the effect.</p>
 <p>Let’s say these are the analyses we want to save the output of and
-report later. This is where <code>tidystats</code> comes in. The steps
-to perform are to first create an empty list and then to use the
-<code>add_stats()</code> function to add analyses to the list. This is
+report later. This is where tidystats comes in. The steps to perform are
+to first create an empty list and then to use the
+<code>add_stats()</code> function to add statistics to the list. This is
 why we stored each analysis into a variable. The
 <code>add_stats()</code> function takes an analysis, extracts the
-statistics, and adds the result to a list. Optionally, you can add
+statistics, and adds the result to the list. Optionally, you can add
 additional information about each analysis, such as whether it was
 preregistered, whether it was a primary, secondary, or exploratory
 analysis, or simply add some notes.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create an empty list to store the analyses in</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Add the analyses</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>results <span class="ot">&lt;-</span> results <span class="sc">%&gt;%</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_stats</span>(t_test, <span class="at">preregistered =</span> <span class="cn">TRUE</span>, <span class="at">type =</span> <span class="st">&quot;primary&quot;</span>, </span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">notes =</span> <span class="st">&quot;A t-test comparing the effect of source on the quote rating.&quot;</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_stats</span>(lm_us_or_not, <span class="at">preregistered =</span> <span class="cn">FALSE</span>, <span class="at">type =</span> <span class="st">&quot;exploratory&quot;</span>, </span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">notes =</span> <span class="st">&quot;Interaction effect with being from the U.S. or not.&quot;</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">add_stats</span>(lm_age)</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="co"># Create an empty list to store the analyses in</span></span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>statistics <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co"># Add the analyses</span></span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>statistics <span class="ot">&lt;-</span> statistics <span class="sc">|&gt;</span></span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>  <span class="fu">add_stats</span>(</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a>    t_test,</span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>    <span class="at">preregistered =</span> <span class="cn">TRUE</span>, <span class="at">type =</span> <span class="st">&quot;primary&quot;</span>,</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>    <span class="at">notes =</span> <span class="st">&quot;A t-test comparing the effect of source on the quote rating.&quot;</span></span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>  <span class="fu">add_stats</span>(</span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>    lm_us_or_not,</span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>    <span class="at">preregistered =</span> <span class="cn">FALSE</span>, <span class="at">type =</span> <span class="st">&quot;exploratory&quot;</span>,</span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a>    <span class="at">notes =</span> <span class="st">&quot;Interaction effect with being from the U.S. or not.&quot;</span></span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a>  <span class="fu">add_stats</span>(lm_age)</span></code></pre></div>
 <p>You can see that I added quite some information to the first and
-second analysis. This is recommended because it is easy to forget which
-analysis is which; and you might accidentally report the wrong analysis
-if you have many of them. It’s also nice to add some documentation so
-that others who are not as familiar with your data can also better
-understand each analysis.</p>
-<p>To save these analyses to a file, you can use the
-<code>write_stats()</code> function.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">write_stats</span>(results, <span class="st">&quot;lorge-curtiss-1936-replication.json&quot;</span>)</span></code></pre></div>
+second analysis. I did this to add some documentation about why each
+analysis was conducted. This might be particularly helpful when others
+will import the file and use it for meta-research (e.g., performing a
+meta-analysis or p-curve analysis).</p>
+<p>To save these analyses to a file, use the <code>write_stats()</code>
+function.</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">write_stats</span>(statistics, <span class="st">&quot;lorge-curtiss-1936-replication.json&quot;</span>)</span></code></pre></div>
 <p>Note the file extension: .json. These types of files are simply text
 files, but in a format that is machine-readable (unfortunately, not very
 human-readable). This file can be used to share with others so that they
 can read it back into R and extract statistics (e.g., for meta-analyses)
-or by you to report the statistics in Word.</p>
+or by you to report the statistics in a text editor.</p>
 </div>
 <div id="references" class="section level2">
 <h2>References</h2>

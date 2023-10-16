@@ -4,48 +4,40 @@
 \alias{describe_data}
 \title{Calculate common descriptive statistics}
 \usage{
-describe_data(data, column, na.rm = TRUE, short = FALSE)
+describe_data(data, ..., na.rm = TRUE, short = FALSE)
 }
 \arguments{
 \item{data}{A data frame.}
 
-\item{column}{An unquoted (numerical) column name from the data frame.}
+\item{...}{One or more unquoted column names from the data frame.}
 
-\item{na.rm}{Logical. Should missing values (including NaN) be excluded in
-calculating the descriptives? The default is TRUE.}
+\item{na.rm}{A boolean indicating whether missing values (including NaN)
+should be excluded in calculating the descriptives? The default is TRUE.}
 
-\item{short}{Logical. Should only a subset of descriptives be reported? If
-set to TRUE, only the N, M, and SD will be returned. The default is FALSE.}
+\item{short}{A boolean indicating whether only a subset of descriptives
+should be reported? If set to \verb{TRUE``, only the N, M, and SD will be returned. The default is }FALSE`.}
 }
 \description{
-\code{describe_data} returns a set of common descriptive statistics
-(e.g., n, mean, sd) for numeric variables.
+\code{\link[=describe_data]{describe_data()}} returns a set of common descriptive statistics
+(e.g., number of observations, mean, standard deviation) for one or more
+numeric variables.
 }
 \details{
-The data can be grouped using \code{dplyr::group_by} so that
+The data can be grouped using \code{\link[dplyr:group_by]{dplyr::group_by()}} so that
 descriptives will be calculated for each group level.
 
-When na.rm is set to FALSE, a percentage column will be added to the output
-that contains the percentage of non-missing data.
-
-Skew and kurtosis are based on the \code{skewness} and \code{kurtosis}
-functions of the \code{moments} package (Komsta & Novomestky, 2015).
-
-Percentages are calculated based on the total of non-missing observations.
-When na.rm is set to FALSE, percentages are based on the total of missing and
-non-missing observations.
+Skew and kurtosis are based on the \code{\link[datawizard:skewness]{datawizard::skewness()}} and
+\code{\link[datawizard:skewness]{datawizard::kurtosis()}} functions (Komsta & Novomestky, 2015).
 }
 \examples{
-# Inspect descriptives of the response column from the 'quote_source' data
-# frame included in tidystats
 describe_data(quote_source, response)
 
-# Repeat the former, now for each level of the source column
+describe_data(quote_source, response, na.rm = FALSE)
+
 quote_source |>
   dplyr::group_by(source) |>
   describe_data(response)
 
-# Only inspect the total N, mean, and standard deviation
 quote_source |>
   dplyr::group_by(source) |>
   describe_data(response, short = TRUE)

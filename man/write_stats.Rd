@@ -9,39 +9,32 @@ write_stats(x, path, digits = 6)
 \arguments{
 \item{x}{A tidystats list.}
 
-\item{path}{Path or connection to write to.}
+\item{path}{A string specifying the path or connection to write to.}
 
 \item{digits}{The number of decimal places to use. The default is 6.}
 }
 \description{
-\code{write_stats} writes a tidystats list to a .json file.
+\code{\link[=write_stats]{write_stats()}} writes a tidystats list to a .json file.
 }
 \examples{
-# Conduct statistical tests
-# t-test:
-sleep_test <- t.test(extra ~ group, data = sleep, paired = TRUE)
+# Conduct a statistical test
+sleep_wide <- reshape(
+  sleep,
+  direction = "wide",
+  idvar = "ID",
+  timevar = "group",
+  sep = "_"
+)
+sleep_test <- t.test(sleep_wide$extra_1, sleep_wide$extra_2, paired = TRUE)
 
-# lm:
-ctl <- c(4.17, 5.58, 5.18, 6.11, 4.50, 4.61, 5.17, 4.53, 5.33, 5.14)
-trt <- c(4.81, 4.17, 4.41, 3.59, 5.87, 3.83, 6.03, 4.89, 4.32, 4.69)
-group <- gl(2, 10, 20, labels = c("Ctl", "Trt"))
-weight <- c(ctl, trt)
-lm_D9 <- lm(weight ~ group)
+# Create an empty list
+statistics <- list()
 
-# ANOVA:
-npk_aov <- aov(yield ~ block + N * P * K, npk)
+# Add statistics to the list
+statistics <- add_stats(statistics, sleep_test)
 
-#' # Create an empty list
-results <- list()
-
-# Add output to the results list
-results <- results |>
-  add_stats(sleep_test) |>
-  add_stats(lm_D9, type = "primary", preregistered = TRUE) |>
-  add_stats(npk_aov, notes = "An ANOVA example")
-
-# Save the results
+# Save the statistics to a file
 dir <- tempdir()
-write_stats(results, file.path(dir, "results.json"))
+write_stats(statistics, file.path(dir, "statistics.json"))
 
 }

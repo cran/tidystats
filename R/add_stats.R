@@ -1,123 +1,94 @@
 #' Add statistical output to a tidystats list
 #'
-#' \code{add_stats} is used to add the output of a statistical test to a
-#' tidystats list. While adding the output, additional information about the
-#' test can be added, including the type of test (primary, secondary, or
-#' exploratory), whether the test was preregistered, and additional notes.
-#' Please note that not all statistical tests are supported. See 'Details' below
-#' for a list of supported statistical tests.
+#' [add_stats()] is used to add the output of a statistical test to a
+#' tidystats list.
 #'
-#' @param results A tidystats list.
+#' @param list A tidystats list.
 #' @param output Output of a statistical test.
-#' @param identifier A character string identifying the model. Automatically
-#' created if not provided.
-#' @param type A character string specifying the type of analysis: primary,
+#' @param identifier A string identifying the model. Automatically created if
+#' not provided.
+#' @param type A string specifying the type of analysis: primary,
 #' secondary, or exploratory.
 #' @param preregistered A boolean specifying whether the analysis was
 #' preregistered or not.
-#' @param notes A character string specifying additional information.
+#' @param notes A string specifying additional information.
+#' @param class A string to manually specify the class of the object so that
+#' tidystats knows how to extract the statistics. See 'Details' for a list of
+#' classes that are supported.
+#' @param args A list of additional arguments to customize which statistics
+#' should be extracted. See 'Details' for a list of supported functions and
+#' their arguments.
 #'
 #' @details
-#' Currently supported functions:
+#' Many functions to perform statistical tests (e.g., [t.test()], [lm()]) return
+#' an object containing the statistics. These objects can be stored in variables
+#' and used with [add_stats()] to extract the statistics and add them to a
+#' list.
 #'
-#' \code{stats}:
-#' \itemize{
-#'   \item \code{t.test()}
-#'   \item \code{cor.test()}
-#'   \item \code{chisq.test()}
-#'   \item \code{wilcox.test()}
-#'   \item \code{fisher.test()}
-#'   \item \code{oneway.test()}
-#'   \item \code{lm()}
-#'   \item \code{glm()}
-#'   \item \code{aov()}
-#'   \item \code{anova()}
-#' }
+#' The list can be saved to a file using the [write_stats()] function.
 #'
-#' \code{lme4}/\code{lmerTest}:
-#' \itemize{
-#'   \item \code{lmer()}
-#' }
-#'
-#' \code{BayesFactor}:
-#' \itemize{
-#'   \item \code{generalTestBF()}
-#'   \item \code{lmBF()}
-#'   \item \code{regressionBF()}
-#'   \item \code{ttestBF()}
-#'   \item \code{anovaBF()}
-#'   \item \code{correlationBF()}
-#'   \item \code{contingencyTableBF()}
-#'   \item \code{proportionBF()}
-#'   \item \code{meta.ttestBF()}
-#' }
-#'
-#' \code{tidystats}:
-#' \itemize{
-#'   \item \code{describe_data()}
-#'   \item \code{count_data()}
-#' }
+#' For a list of supported functions, see `vignette("supported-functions",
+#' package = "tidystats")`.
 #'
 #' @examples
+#' # Conduct analyses
+#' sleep_wide <- reshape(
+#'   sleep,
+#'   direction = "wide",
+#'   idvar = "ID",
+#'   timevar = "group",
+#'   sep = "_"
+#' )
+#' sleep_test <- t.test(sleep_wide$extra_1, sleep_wide$extra_2, paired = TRUE)
 #'
-#' # Conduct statistical tests
-#' # t-test:
-#' sleep_test <- t.test(extra ~ group, data = sleep, paired = TRUE)
-#'
-#' # lm:
 #' ctl <- c(4.17, 5.58, 5.18, 6.11, 4.50, 4.61, 5.17, 4.53, 5.33, 5.14)
 #' trt <- c(4.81, 4.17, 4.41, 3.59, 5.87, 3.83, 6.03, 4.89, 4.32, 4.69)
 #' group <- gl(2, 10, 20, labels = c("Ctl", "Trt"))
 #' weight <- c(ctl, trt)
 #' lm_D9 <- lm(weight ~ group)
+#' lm_D9_confint <- confint(lm_D9)
 #'
-#' # ANOVA:
 #' npk_aov <- aov(yield ~ block + N * P * K, npk)
 #'
-#' #' # Create an empty list
-#' results <- list()
+#' # Create an empty list to store the statistics in
+#' statistics <- list()
 #'
-#' # Add output to the results list
-#' results <- results |>
-#'   add_stats(sleep_test) |>
-#'   add_stats(lm_D9, type = "primary", preregistered = TRUE) |>
+#' # Add statistics to the list
+#' statistics <- statistics |>
+#'   add_stats(sleep_test, type = "primary", preregistered = TRUE) |>
+#'   add_stats(lm_D9) |>
+#'   add_stats(lm_D9_confint, class = "confint") |>
 #'   add_stats(npk_aov, notes = "An ANOVA example")
 #'
 #' @export
-add_stats <- function(
-    results, output, identifier = NULL, type = NULL,
-    preregistered = NULL, notes = NULL) {
-  UseMethod("add_stats", output)
-}
-
-#' @export
-add_stats.default <- function(
-    results, output, identifier = NULL, type = NULL,
-    preregistered = NULL, notes = NULL) {
-  # Create an identifier if it is not specified, else check whether it already
-  # exists
+add_stats <- function(list, output, identifier = NULL, type = NULL,
+                      preregistered = NULL, notes = NULL, args = NULL,
+                      class = NULL) {
   if (is.null(identifier)) {
     if (deparse(substitute(output)) == ".") {
-      identifier <- paste0("M", formatC(length(results) + 1,
-        width = "1",
-        format = "d"
-      ))
+      identifier <- paste0(
+        "M", formatC(length(list) + 1,
+          width = "1", format = "d"
+        )
+      )
     } else {
       identifier <- deparse(substitute(output))
     }
   } else {
-    if (!is.null(names(results))) {
-      if (identifier %in% names(results)) {
+    if (!is.null(names(list))) {
+      if (identifier %in% names(list)) {
         stop("Identifier already exists.")
       }
     }
   }
 
-  # Tidy the output
-  analysis <- tidy_stats(output)
+  if (!is.null(class)) {
+    class(output) <- append(class(output), class, after = 0)
+  }
 
-  # Add type: primary, secondary, or exploratory
-  if (!missing(type)) {
+  analysis <- tidy_stats(output, args = args)
+
+  if (!is.null(type)) {
     if (type == "primary") {
       analysis$type <- "primary"
     } else if (type == "secondary") {
@@ -132,8 +103,7 @@ add_stats.default <- function(
     }
   }
 
-  # Add whether the analysis was preregistered or not
-  if (!missing(preregistered)) {
+  if (!is.null(preregistered)) {
     if (preregistered) {
       analysis$preregistered <- "yes"
     } else {
@@ -141,83 +111,11 @@ add_stats.default <- function(
     }
   }
 
-  # Add notes
-  if (!missing(notes)) {
+  if (!is.null(notes)) {
     analysis$notes <- notes
   }
 
-  # Add the new analysis to the list
-  results[[identifier]] <- analysis
+  list[[identifier]] <- analysis
 
-  # Return the new results list
-  return(results)
-}
-
-#' @export
-add_stats.list <- function(
-    results, output, identifier = NULL, type = NULL,
-    preregistered = NULL, notes = NULL) {
-  # Create an identifier if it is not specified, else check whether it already
-  # exists
-  if (is.null(identifier)) {
-    if (deparse(substitute(output)) == ".") {
-      identifier <- paste0("M", formatC(length(results) + 1,
-        width = "1",
-        format = "d"
-      ))
-    } else {
-      identifier <- deparse(substitute(output))
-    }
-  } else {
-    if (!is.null(names(results))) {
-      if (identifier %in% names(results)) {
-        stop("Identifier already exists.")
-      }
-    }
-  }
-
-  # Simply set analysis to output; we don't need to tidy the results because
-  # they should already be tidy
-  analysis <- output
-
-  # Add method name and position it as the first element of the list
-  analysis <- append(analysis, list(method = "Generic test"), 0)
-
-  # TODO: Add checks to see whether the format of the provided list is correct
-
-  # Add type: primary, secondary, or exploratory
-  if (!missing(type)) {
-    if (type == "primary") {
-      analysis$type <- "primary"
-    } else if (type == "secondary") {
-      analysis$type <- "secondary"
-    } else if (type == "exploratory") {
-      analysis$type <- "exploratory"
-    } else {
-      warning(paste(
-        "Unknown type; type should be either 'primary',",
-        "'secondary', or 'exploratory'."
-      ))
-    }
-  }
-
-  # Add whether the analysis was preregistered or not
-  if (!missing(preregistered)) {
-    if (preregistered) {
-      analysis$preregistered <- "yes"
-    } else {
-      analysis$preregistered <- "no"
-    }
-  }
-
-  # Add notes
-  if (!missing(notes)) {
-    analysis$notes <- notes
-  }
-
-  # Add the new analysis to the list
-  results[[identifier]] <- analysis
-
-  # Return the new results list
-  return(results)
+  return(list)
 }

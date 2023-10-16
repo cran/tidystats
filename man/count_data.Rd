@@ -4,7 +4,7 @@
 \alias{count_data}
 \title{Count the number of observations}
 \usage{
-count_data(data, ..., na.rm = FALSE)
+count_data(data, ..., na.rm = FALSE, pct = FALSE)
 }
 \arguments{
 \item{data}{A data frame.}
@@ -12,29 +12,28 @@ count_data(data, ..., na.rm = FALSE)
 \item{...}{One or more unquoted (categorical) column names from the data
 frame, separated by commas.}
 
-\item{na.rm}{Logical. Should missing values (including NaN) be removed?}
+\item{na.rm}{A boolean specifying whether missing values (including NaN)
+should be removed.}
+
+\item{pct}{A boolean indicating whether to calculate percentages instead of
+proportions. The default is \code{FALSE}.}
 }
 \description{
-\code{count_data} returns the number and percentage of observations for
+\code{\link[=count_data]{count_data()}} returns the number and proportion of observations for
 categorical variables.
 }
 \details{
-The data frame can be grouped using \strong{dplyr}'s \code{group_by}
+The data frame can be grouped using \code{\link[dplyr:group_by]{dplyr::group_by()}}
 so that the number of observations will be calculated within each group
 level.
 }
 \examples{
-
-# 1 variable
 count_data(quote_source, source)
-
-# 2 variables
 count_data(quote_source, source, sex)
-
-# Ignore missing values
 count_data(quote_source, source, sex, na.rm = TRUE)
+count_data(quote_source, source, sex, na.rm = TRUE, pct = TRUE)
 
-# Use group_by() to get percentages within each group
+# Use dplyr::group_by() to calculate proportions within a group
 quote_source |>
   dplyr::group_by(source) |>
   count_data(sex)
