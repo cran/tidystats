@@ -9,7 +9,6 @@ library(knitr)
 options(knitr.kable.NA = "-")
 
 ## ----results = "hide", message = FALSE----------------------------------------
-# Load packages
 library(tidystats)
 library(dplyr)
 

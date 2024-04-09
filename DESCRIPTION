@@ -1,7 +1,7 @@
 Package: tidystats
 Type: Package
 Title: Save Output of Statistical Tests
-Version: 0.6.0
+Version: 0.6.1
 Author: Willem Sleegers
 Maintainer: Willem Sleegers <w.sleegers@me.com>
 Description: Save the output of statistical tests in an organized file that can 
@@ -10,7 +10,7 @@ URL: https://willemsleegers.github.io/tidystats/
 BugReports: https://github.com/WillemSleegers/tidystats/issues
 License: MIT + file LICENSE
 Encoding: UTF-8
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 LazyData: true
 Depends: R (>= 3.5.0)
 Imports: dplyr, tidyr, purrr, stringr, readr, jsonlite, tibble,
@@ -20,6 +20,6 @@ Suggests: BayesFactor, knitr, lme4, lmerTest, rmarkdown, effectsize,
         methods, nlme, rlang, tidyselect
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2023-10-16 23:00:38 UTC; willem
+Packaged: 2024-04-09 11:48:18 UTC; willem
 Repository: CRAN
-Date/Publication: 2023-10-16 23:40:02 UTC
+Date/Publication: 2024-04-09 12:00:02 UTC

@@ -11,7 +11,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 
 
-<meta name="date" content="2023-10-17" />
+<meta name="date" content="2024-04-09" />
 
 <title>Reusing statistics</title>
 
@@ -338,7 +338,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 
 <h1 class="title toc-ignore">Reusing statistics</h1>
-<h4 class="date">2023-10-17</h4>
+<h4 class="date">2024-04-09</h4>
 
 
 
@@ -358,19 +358,18 @@ on the data to retrieve the statistics of interest.</p>
 frame and perform several simple operations.</p>
 <p>In the example below we read the tidystats list and select all the
 p-values.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># Load packages</span></span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(tidystats)</span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
-<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="co"># Read the .json file containing the statistics and immediately convert it to</span></span>
-<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="co"># a data frame</span></span>
-<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>statistics <span class="ot">&lt;-</span> <span class="fu">read_stats</span>(<span class="st">&quot;statistics.json&quot;</span>) <span class="sc">|&gt;</span></span>
-<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>  <span class="fu">tidy_stats_to_data_frame</span>()</span>
-<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="co"># Extract all the p-values</span></span>
-<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a>p_values <span class="ot">&lt;-</span> <span class="fu">filter</span>(statistics, statistic_name <span class="sc">==</span> <span class="st">&quot;p&quot;</span>)</span>
-<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a></span>
-<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a>p_values</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(tidystats)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co"># Read the .json file containing the statistics and immediately convert it to</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="co"># a data frame</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>statistics <span class="ot">&lt;-</span> <span class="fu">read_stats</span>(<span class="st">&quot;statistics.json&quot;</span>) <span class="sc">|&gt;</span></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>  <span class="fu">tidy_stats_to_data_frame</span>()</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co"># Extract all the p-values</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>p_values <span class="ot">&lt;-</span> <span class="fu">filter</span>(statistics, statistic_name <span class="sc">==</span> <span class="st">&quot;p&quot;</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a>p_values</span></code></pre></div>
 <table style="width:100%;">
 <colgroup>
 <col width="9%" />

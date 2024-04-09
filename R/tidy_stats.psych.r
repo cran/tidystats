@@ -8,7 +8,7 @@ tidy_stats.psych <- function(x, args = NULL) {
   } else if ("mardia" %in% class(x)) {
     analysis <- tidy_stats_psych_mardia(x)
   } else if ("ICC" %in% class(x)) {
-    analysis <- tidy_stats_psych_icc(x)
+    analysis <- tidy_stats_psych_ICC(x)
   }
 
   analysis <- add_package_info(analysis, "psych")
@@ -380,7 +380,7 @@ tidy_stats_psych_mardia <- function(x) {
   return(analysis)
 }
 
-tidy_stats_psych_icc <- function(x) {
+tidy_stats_psych_ICC <- function(x) {
   analysis <- list(method = "Intraclass Correlations")
 
   results <- x$results
