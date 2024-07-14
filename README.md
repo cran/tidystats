@@ -6,7 +6,7 @@
 <!-- badges: start -->
 
 
-[![](https://www.r-pkg.org/badges/version/tidystats?color=green)](https://cran.r-project.org/package=tidystats) [![](http://cranlogs.r-pkg.org/badges/grand-total/tidystats?color=green)](https://cran.r-project.org/package=tidystats) [![](http://cranlogs.r-pkg.org/badges/last-month/tidystats?color=green)](https://cran.r-project.org/package=tidystats) [![](http://cranlogs.r-pkg.org/badges/last-week/tidystats?color=green)](https://cran.r-project.org/package=tidystats) [![](https://img.shields.io/badge/doi-10.5281/zenodo.4041859-blue.svg)](https://doi.org/10.5281/zenodo.4041859)
+[![](https://www.r-pkg.org/badges/version/tidystats?color=green)](https://cran.r-project.org/package=tidystats) [![](http://cranlogs.r-pkg.org/badges/grand-total/tidystats?color=green)](https://cran.r-project.org/package=tidystats) [![](http://cranlogs.r-pkg.org/badges/last-month/tidystats?color=green)](https://cran.r-project.org/package=tidystats) [![](http://cranlogs.r-pkg.org/badges/last-week/tidystats?color=green)](https://cran.r-project.org/package=tidystats) [![](https://img.shields.io/badge/doi-10.5281/zenodo.4041858-blue.svg)](https://doi.org/10.5281/zenodo.4041858)
 <!-- badges: end -->
 
 **Author:** [Willem Sleegers](https://willemsleegers.com)
@@ -30,7 +30,7 @@ Github.
 tidystats can be installed from CRAN.
 
 
-```r
+``` r
 install.packages("tidystats")
 ```
 
@@ -38,7 +38,7 @@ You can also install the development version from GitHub using the
 [`remotes`](https://github.com/r-lib/remotes) package.
 
 
-```r
+``` r
 remotes::install_github("willemsleegers/tidystats")
 ```
 
@@ -71,7 +71,7 @@ The following example shows how to combine and save the statistics from three
 different statistical tests.
 
 
-```r
+``` r
 # Conduct a t-test, regression, and an ANOVA
 sleep_wide <- reshape(
   sleep,
