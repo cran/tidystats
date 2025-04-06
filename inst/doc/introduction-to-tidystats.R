@@ -37,5 +37,5 @@ statistics <- statistics |>
   add_stats(lm_age)
 
 ## ----saving, eval = FALSE-----------------------------------------------------
-#  write_stats(statistics, "lorge-curtiss-1936-replication.json")
+# write_stats(statistics, "lorge-curtiss-1936-replication.json")
 
