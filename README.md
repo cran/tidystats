@@ -4,7 +4,6 @@
 # tidystats
 
 <!-- badges: start -->
-[![CRAN status](https://www.r-pkg.org/badges/version/tidystats)](https://CRAN.R-project.org/package=tidystats)
 <!-- badges: end -->
 
 **Author:** [Willem Sleegers](https://willemsleegers.com)
@@ -16,12 +15,9 @@ extracts statistics from the output of statistical functions
 file can be shared with others and used in popular text editors to reproducibly 
 report the statistics.
 
-Please see below for instructions on how to install and use this package. 
-
-**Do note that the package is currently in development. This means the package 
-may contain bugs and is subject to significant changes.** If you find any bugs 
-or if you have any feedback, please let me know by creating an issue here on 
-Github.
+Please see below for instructions on how to install and use this package. If you
+find any bugs or have any feedback, please let me know by creating an issue here
+on Github.
 
 ## Installation
 
@@ -71,14 +67,11 @@ different statistical tests.
 
 ``` r
 # Conduct a t-test, regression, and an ANOVA
-sleep_wide <- reshape(
-  sleep,
-  direction = "wide",
-  idvar = "ID",
-  timevar = "group",
-  sep = "_"
+sleep_test <- t.test(
+  sleep$extra[sleep$group == 1],
+  sleep$extra[sleep$group == 2],
+  paired = TRUE
 )
-sleep_test <- t.test(sleep_wide$extra_1, sleep_wide$extra_2, paired = TRUE)
 
 ctl <- c(4.17, 5.58, 5.18, 6.11, 4.50, 4.61, 5.17, 4.53, 5.33, 5.14)
 trt <- c(4.81, 4.17, 4.41, 3.59, 5.87, 3.83, 6.03, 4.89, 4.32, 4.69)
@@ -101,9 +94,9 @@ statistics <- statistics |>
 write_stats(statistics, "statistics.json")
 ```
 
-The result is a .json file that contains all the statistics from the three 
+The result is a .json file that contains all the statistics from the three
 statistical tests. If you want to see what this file looks like, you can inspect
-it [here](https://github.com/WillemSleegers/tidystats/blob/master/tests/data/main.json).
+it [here](https://github.com/WillemSleegers/tidystats/blob/master/inst/extdata/statistics.json).
 
 For a fully worked out example, see `vignette("introduction-to-tidystats")`.
 
@@ -129,19 +122,9 @@ you can do:
 
 ## Reporting statistics
 
-The file created with the `write_stats()` function can be used in several text
-editor add-ins to reproducibly report the statistics. For more information on 
-these add-ins, please see the [tidystats website](https://tidystats.io/) or 
-their GitHub pages:
-
-- [Microsoft Word add-in](https://github.com/WillemSleegers/tidystats-Word-add-in)
-- [Google Docs add-in](https://github.com/WillemSleegers/tidystats-Google-Docs-add-in)
+The file created with the `write_stats()` function can be used in the tidystats Microsoft Word add-in to report statistics in a Microsoft Word document. For more information, see the [Word add-in](https://willemsleegers.github.io/tidystats/articles/word-add-in.html) page on the tidystats website.
 
 ## More information
 
-See the [tidystats website](https://tidystats.io/) for more information, 
-such as a FAQ, tips and tricks, as well as how to receive (and give) support. 
-
-If you have any questions or comments, feel free to create an 
-[issue](https://github.com/WillemSleegers/tidystats/issues) here on GitHub or 
-see the website for ways to contact me.
+If you have any questions or comments, please create an 
+[issue](https://github.com/WillemSleegers/tidystats/issues) here on GitHub.

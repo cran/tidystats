@@ -1,6 +1,6 @@
 {
-  "sleep_t_test": {
-    "name": "sleep_wide$extra_1 and sleep_wide$extra_2",
+  "sleep_test": {
+    "name": "sleep$extra[sleep$group == 1] and sleep$extra[sleep$group == 2]",
     "method": "Paired t-test",
     "statistics": [
       {
@@ -37,11 +37,11 @@
     },
     "package": {
       "name": "stats",
-      "version": "4.3.1"
+      "version": "4.5.2"
     },
     "type": "primary"
   },
-  "D9_lm": {
+  "lm_D9": {
     "name": "weight ~ group",
     "method": "Linear regression",
     "groups": [
@@ -150,9 +150,9 @@
     ],
     "package": {
       "name": "stats",
-      "version": "4.3.1"
+      "version": "4.5.2"
     },
-    "preregistered": "no"
+    "preregistered": "yes"
   },
   "npk_aov": {
     "name": "yield ~ block + N * P * K",
@@ -421,7 +421,7 @@
     ],
     "package": {
       "name": "stats",
-      "version": "4.3.1"
+      "version": "4.5.2"
     },
     "notes": "An ANOVA example"
   }
